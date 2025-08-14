@@ -45,7 +45,7 @@ const SearchBar = ({ onSearch, onSortChange }: SearchBarProps) => {
                   <SelectValue placeholder="Cidade ▾" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas as cidades</SelectItem>
+                  <SelectItem value="all">Todas as cidades</SelectItem>
                   <SelectItem value="fortaleza">Fortaleza - CE</SelectItem>
                   <SelectItem value="sao-paulo">São Paulo - SP</SelectItem>
                   <SelectItem value="rio-de-janeiro">Rio de Janeiro - RJ</SelectItem>

@@ -36,7 +36,7 @@ const EventsGrid = ({ searchQuery = '', cityFilter = '', sortBy = 'date-desc' }:
     }
 
     // Filter by city
-    if (cityFilter) {
+    if (cityFilter && cityFilter !== 'all') {
       const cityMap: { [key: string]: string } = {
         'fortaleza': 'Fortaleza - CE',
         'sao-paulo': 'São Paulo - SP',
