@@ -12,6 +12,8 @@ import { toast } from '@/hooks/use-toast';
 import { formatCpf, validateCpf } from '@/lib/cpfValidation';
 import { useSessionMock } from '@/hooks/useSessionMock';
 
+type Role = 'cliente' | 'fotografo';
+
 interface AuthModalProps {
   open: boolean;
   onClose: () => void;
@@ -130,7 +132,7 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
       handle: `@${registerForm.nome.toLowerCase().replace(/\s+/g, '')}`
     } : undefined;
 
-    login(registerForm.nome, registerForm.email, registerForm.tipo, registerForm.cpf, perfil);
+    login(registerForm.nome, registerForm.email, registerForm.tipo as Role, registerForm.cpf, perfil);
     
     const message = registerForm.tipo === 'fotografo' 
       ? "Bem-vindo! Seu perfil de fotógrafo foi criado (mock)"

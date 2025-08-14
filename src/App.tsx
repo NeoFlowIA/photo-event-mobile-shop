@@ -20,6 +20,7 @@ import PhotographerEventCreate from "./pages/PhotographerEventCreate";
 import PhotographerEventDetails from "./pages/PhotographerEventDetails";
 import PhotographerCollaborations from "./pages/PhotographerCollaborations";
 import PhotographerRoute from "./components/PhotographerRoute";
+import DebugSessionBadge from "./components/DebugSessionBadge";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -82,6 +83,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <DebugSessionBadge />
       <BrowserRouter>
         <RouteHandler />
         <Routes>
