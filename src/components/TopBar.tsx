@@ -61,23 +61,47 @@ const TopBar = () => {
             {session.loggedIn ? (
               <>
                 <nav className="hidden sm:flex items-center gap-4">
-                  <button 
-                    onClick={() => navigate('/carrinho')}
-                    className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
-                    aria-label="Carrinho"
-                  >
-                    <ShoppingCart size={16} />
-                    <span className="hidden md:inline">Carrinho</span>
-                  </button>
-                  
-                  <button 
-                    onClick={() => navigate('/minhas-fotos')}
-                    className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
-                    aria-label="Minhas fotos"
-                  >
-                    <Camera size={16} />
-                    <span className="hidden md:inline">Minhas fotos</span>
-                  </button>
+                  {session.tipo === 'fotografo' ? (
+                    <>
+                      <button 
+                        onClick={() => navigate('/fotografo/portfolio')}
+                        className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
+                        aria-label="Meu Portfólio"
+                      >
+                        <Camera size={16} />
+                        <span className="hidden md:inline">Meu Portfólio</span>
+                      </button>
+                      
+                      <button 
+                        onClick={() => navigate('/fotografo/eventos')}
+                        className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
+                        aria-label="Meus Eventos"
+                      >
+                        <Search size={16} />
+                        <span className="hidden md:inline">Meus Eventos</span>
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button 
+                        onClick={() => navigate('/carrinho')}
+                        className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
+                        aria-label="Carrinho"
+                      >
+                        <ShoppingCart size={16} />
+                        <span className="hidden md:inline">Carrinho</span>
+                      </button>
+                      
+                      <button 
+                        onClick={() => navigate('/minhas-fotos')}
+                        className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
+                        aria-label="Minhas fotos"
+                      >
+                        <Camera size={16} />
+                        <span className="hidden md:inline">Minhas fotos</span>
+                      </button>
+                    </>
+                  )}
                 </nav>
                 
                 <DropdownMenu>
@@ -92,6 +116,11 @@ const TopBar = () => {
                     <DropdownMenuItem onClick={() => navigate('/perfil')}>
                       Meu Perfil
                     </DropdownMenuItem>
+                    {session.tipo === 'fotografo' && (
+                      <DropdownMenuItem onClick={() => navigate('/fotografo/eventos/novo')}>
+                        Criar Evento
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem onClick={handleLogout}>
                       Sair
                     </DropdownMenuItem>

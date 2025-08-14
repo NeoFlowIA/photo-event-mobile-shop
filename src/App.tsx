@@ -14,6 +14,12 @@ import History from "./pages/History";
 import Profile from "./pages/Profile";
 import AddCredit from "./pages/AddCredit";
 import Portfolios from "./pages/Portfolios";
+import PhotographerPortfolio from "./pages/PhotographerPortfolio";
+import PhotographerEvents from "./pages/PhotographerEvents";
+import PhotographerEventCreate from "./pages/PhotographerEventCreate";
+import PhotographerEventDetails from "./pages/PhotographerEventDetails";
+import PhotographerCollaborations from "./pages/PhotographerCollaborations";
+import PhotographerRoute from "./components/PhotographerRoute";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -90,6 +96,34 @@ const App = () => (
           <Route path="/perfil" element={<Profile />} />
           <Route path="/adicionar-credito" element={<AddCredit />} />
           <Route path="/portfolios" element={<Portfolios />} />
+          
+          {/* Photographer Routes */}
+          <Route path="/fotografo/portfolio" element={
+            <PhotographerRoute>
+              <PhotographerPortfolio />
+            </PhotographerRoute>
+          } />
+          <Route path="/fotografo/eventos" element={
+            <PhotographerRoute>
+              <PhotographerEvents />
+            </PhotographerRoute>
+          } />
+          <Route path="/fotografo/eventos/novo" element={
+            <PhotographerRoute>
+              <PhotographerEventCreate />
+            </PhotographerRoute>
+          } />
+          <Route path="/fotografo/eventos/:id" element={
+            <PhotographerRoute>
+              <PhotographerEventDetails />
+            </PhotographerRoute>
+          } />
+          <Route path="/fotografo/colaboracoes" element={
+            <PhotographerRoute>
+              <PhotographerCollaborations />
+            </PhotographerRoute>
+          } />
+          
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

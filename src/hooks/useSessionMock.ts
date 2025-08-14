@@ -4,6 +4,17 @@ interface SessionData {
   loggedIn: boolean;
   nome?: string;
   cpf?: string;
+  tipo?: 'cliente' | 'fotografo';
+  email?: string;
+  perfil?: {
+    bio?: string;
+    telefone?: string;
+    website?: string;
+    redes?: string;
+    urlPerfil?: string;
+    urlCapa?: string;
+    handle?: string;
+  };
 }
 
 const STORAGE_KEY = 'of.session.v1';
@@ -33,8 +44,8 @@ export const useSessionMock = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newSession));
   };
 
-  const login = (nome: string, cpf?: string) => {
-    updateSession({ loggedIn: true, nome, cpf });
+  const login = (nome: string, cpf?: string, tipo?: 'cliente' | 'fotografo', email?: string, perfil?: SessionData['perfil']) => {
+    updateSession({ loggedIn: true, nome, cpf, tipo, email, perfil });
   };
 
   const logout = () => {

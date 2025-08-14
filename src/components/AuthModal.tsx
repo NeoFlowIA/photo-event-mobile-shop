@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from '@/hooks/use-toast';
 import { formatCpf, validateCpf } from '@/lib/cpfValidation';
 import { useSessionMock } from '@/hooks/useSessionMock';
@@ -22,7 +24,14 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
     email: '',
     cpf: '',
     password: '',
-    acceptTerms: false
+    acceptTerms: false,
+    tipo: 'cliente' as 'cliente' | 'fotografo',
+    bio: '',
+    telefone: '',
+    website: '',
+    redes: '',
+    fotoPerfil: null as File | null,
+    fotoCapa: null as File | null
   });
 
   // Mock users database
@@ -54,7 +63,8 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
       return;
     }
     
-    login(user.nome, user.cpf);
+    const perfil = user.role === 'fotografo' ? { handle: user.handle } : undefined;
+    login(user.nome, user.cpf, user.role as 'cliente' | 'fotografo', user.email, perfil);
     toast({
       title: "Login realizado!",
       description: `Bem-vindo, ${user.nome}!`,
@@ -92,10 +102,25 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
       return;
     }
 
-    login(registerForm.nome, registerForm.cpf);
+    const perfil = registerForm.tipo === 'fotografo' ? {
+      bio: registerForm.bio,
+      telefone: registerForm.telefone,
+      website: registerForm.website,
+      redes: registerForm.redes,
+      urlPerfil: registerForm.fotoPerfil ? URL.createObjectURL(registerForm.fotoPerfil) : undefined,
+      urlCapa: registerForm.fotoCapa ? URL.createObjectURL(registerForm.fotoCapa) : undefined,
+      handle: `@${registerForm.nome.toLowerCase().replace(/\s+/g, '')}`
+    } : undefined;
+
+    login(registerForm.nome, registerForm.cpf, registerForm.tipo, registerForm.email, perfil);
+    
+    const message = registerForm.tipo === 'fotografo' 
+      ? "Bem-vindo! Seu perfil de fotógrafo foi criado (mock)"
+      : "Sua conta foi criada com sucesso.";
+      
     toast({
       title: "Cadastro realizado!",
-      description: "Sua conta foi criada com sucesso.",
+      description: message,
     });
     onClose();
   };
@@ -155,6 +180,24 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
           <TabsContent value="register" className="space-y-4">
             <form onSubmit={handleRegister} className="space-y-4">
               <div>
+                <Label>Tipo de conta</Label>
+                <RadioGroup
+                  value={registerForm.tipo}
+                  onValueChange={(value) => setRegisterForm(prev => ({ ...prev, tipo: value as 'cliente' | 'fotografo' }))}
+                  className="flex flex-row gap-4 mt-2"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="cliente" id="cliente" />
+                    <Label htmlFor="cliente">Cliente</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="fotografo" id="fotografo" />
+                    <Label htmlFor="fotografo">Fotógrafo</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+
+              <div>
                 <Label htmlFor="register-name">Nome completo</Label>
                 <Input
                   id="register-name"
@@ -178,18 +221,6 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
               </div>
               
               <div>
-                <Label htmlFor="register-cpf">CPF</Label>
-                <Input
-                  id="register-cpf"
-                  value={registerForm.cpf}
-                  onChange={(e) => handleCpfChange(e.target.value)}
-                  placeholder="000.000.000-00"
-                  maxLength={14}
-                  required
-                />
-              </div>
-              
-              <div>
                 <Label htmlFor="register-password">Senha</Label>
                 <Input
                   id="register-password"
@@ -197,6 +228,83 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
                   value={registerForm.password}
                   onChange={(e) => setRegisterForm(prev => ({ ...prev, password: e.target.value }))}
                   placeholder="••••••••"
+                  required
+                />
+              </div>
+
+              {registerForm.tipo === 'fotografo' && (
+                <>
+                  <div>
+                    <Label htmlFor="register-bio">Biografia</Label>
+                    <Textarea
+                      id="register-bio"
+                      value={registerForm.bio}
+                      onChange={(e) => setRegisterForm(prev => ({ ...prev, bio: e.target.value }))}
+                      placeholder="Conte um pouco sobre seu trabalho..."
+                      rows={3}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="register-telefone">Telefone/WhatsApp</Label>
+                    <Input
+                      id="register-telefone"
+                      value={registerForm.telefone}
+                      onChange={(e) => setRegisterForm(prev => ({ ...prev, telefone: e.target.value }))}
+                      placeholder="(85) 99999-9999"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="register-website">Website</Label>
+                    <Input
+                      id="register-website"
+                      value={registerForm.website}
+                      onChange={(e) => setRegisterForm(prev => ({ ...prev, website: e.target.value }))}
+                      placeholder="https://seuportfolio.com"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="register-redes">Redes sociais (Instagram, Behance, etc.)</Label>
+                    <Input
+                      id="register-redes"
+                      value={registerForm.redes}
+                      onChange={(e) => setRegisterForm(prev => ({ ...prev, redes: e.target.value }))}
+                      placeholder="@seuinstagram, behance.net/seuportfolio"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="register-foto-perfil">Foto de Perfil</Label>
+                    <Input
+                      id="register-foto-perfil"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setRegisterForm(prev => ({ ...prev, fotoPerfil: e.target.files?.[0] || null }))}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="register-foto-capa">Foto de Capa</Label>
+                    <Input
+                      id="register-foto-capa"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setRegisterForm(prev => ({ ...prev, fotoCapa: e.target.files?.[0] || null }))}
+                    />
+                  </div>
+                </>
+              )}
+              
+              <div>
+                <Label htmlFor="register-cpf">CPF</Label>
+                <Input
+                  id="register-cpf"
+                  value={registerForm.cpf}
+                  onChange={(e) => handleCpfChange(e.target.value)}
+                  placeholder="000.000.000-00"
+                  maxLength={14}
                   required
                 />
               </div>
