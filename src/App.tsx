@@ -65,9 +65,9 @@ const RouteHandler = () => {
       }, 100);
     }
     
-    // Handle /?login=1 parameter - dispatch custom event to open auth modal
+    // Handle /?login=cliente|fotografo parameters - dispatch custom event to open auth modal
     const loginParam = searchParams.get('login');
-    if (loginParam === '1' && window.location.pathname === '/') {
+    if ((loginParam === 'cliente' || loginParam === 'fotografo' || loginParam === '1') && window.location.pathname === '/') {
       setTimeout(() => {
         window.dispatchEvent(new CustomEvent('openAuthModal'));
       }, 100);

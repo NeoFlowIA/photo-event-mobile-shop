@@ -8,7 +8,7 @@ import AuthModal from './AuthModal';
 
 const TopBar = () => {
   const navigate = useNavigate();
-  const { session, logout } = useSessionMock();
+  const { session, logout, is } = useSessionMock();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Listen for custom event to open auth modal
@@ -61,7 +61,7 @@ const TopBar = () => {
             {session.loggedIn ? (
               <>
                 <nav className="hidden sm:flex items-center gap-4">
-                  {session.tipo === 'fotografo' ? (
+                  {is('fotografo') ? (
                     <>
                       <button 
                         onClick={() => navigate('/fotografo/portfolio')}
@@ -81,7 +81,7 @@ const TopBar = () => {
                         <span className="hidden md:inline">Meus Eventos</span>
                       </button>
                     </>
-                  ) : (
+                  ) : is('cliente') ? (
                     <>
                       <button 
                         onClick={() => navigate('/carrinho')}
@@ -101,7 +101,7 @@ const TopBar = () => {
                         <span className="hidden md:inline">Minhas fotos</span>
                       </button>
                     </>
-                  )}
+                  ) : null}
                 </nav>
                 
                 <DropdownMenu>
@@ -116,7 +116,7 @@ const TopBar = () => {
                     <DropdownMenuItem onClick={() => navigate('/perfil')}>
                       Meu Perfil
                     </DropdownMenuItem>
-                    {session.tipo === 'fotografo' && (
+                    {is('fotografo') && (
                       <DropdownMenuItem onClick={() => navigate('/fotografo/eventos/novo')}>
                         Criar Evento
                       </DropdownMenuItem>

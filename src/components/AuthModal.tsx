@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import { formatCpf, validateCpf } from '@/lib/cpfValidation';
 import { useSessionMock } from '@/hooks/useSessionMock';
@@ -17,7 +18,7 @@ interface AuthModalProps {
 }
 
 const AuthModal = ({ open, onClose }: AuthModalProps) => {
-  const { login } = useSessionMock();
+  const { loginWith, login, DEMO_USERS } = useSessionMock();
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
   const [registerForm, setRegisterForm] = useState({
     nome: '',
@@ -34,11 +35,23 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
     fotoCapa: null as File | null
   });
 
-  // Mock users database
-  const mockUsers = [
-    { email: "joao@teste.com", senha: "123456", nome: "João Silva", cpf: "123.456.789-09", role: "cliente" },
-    { email: "foto@teste.com", senha: "123456", nome: "Ana Aquino", handle: "@aquaphoto", role: "fotografo" }
-  ];
+  // Check for deep link params to auto-fill login
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const loginParam = urlParams.get('login');
+    
+    if (loginParam === 'cliente') {
+      const clienteUser = DEMO_USERS.find(u => u.role === 'cliente');
+      if (clienteUser) {
+        setLoginForm({ email: clienteUser.email, password: clienteUser.senha });
+      }
+    } else if (loginParam === 'fotografo') {
+      const fotografoUser = DEMO_USERS.find(u => u.role === 'fotografo');
+      if (fotografoUser) {
+        setLoginForm({ email: fotografoUser.email, password: fotografoUser.senha });
+      }
+    }
+  }, [open, DEMO_USERS]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,10 +64,9 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
       return;
     }
 
-    // Find user in mock database
-    const user = mockUsers.find(u => u.email === loginForm.email && u.senha === loginForm.password);
+    const success = loginWith(loginForm.email, loginForm.password);
     
-    if (!user) {
+    if (!success) {
       toast({
         title: "Credenciais inválidas",
         description: "Email ou senha incorretos.",
@@ -63,13 +75,19 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
       return;
     }
     
-    const perfil = user.role === 'fotografo' ? { handle: user.handle } : undefined;
-    login(user.nome, user.cpf, user.role as 'cliente' | 'fotografo', user.email, perfil);
+    const user = DEMO_USERS.find(u => u.email === loginForm.email);
     toast({
       title: "Login realizado!",
-      description: `Bem-vindo, ${user.nome}!`,
+      description: `Bem-vindo(a), ${user?.nome}!`,
     });
     onClose();
+  };
+
+  const fillDemoCredentials = (role: 'cliente' | 'fotografo') => {
+    const user = DEMO_USERS.find(u => u.role === role);
+    if (user) {
+      setLoginForm({ email: user.email, password: user.senha });
+    }
   };
 
   const handleRegister = (e: React.FormEvent) => {
@@ -112,7 +130,7 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
       handle: `@${registerForm.nome.toLowerCase().replace(/\s+/g, '')}`
     } : undefined;
 
-    login(registerForm.nome, registerForm.cpf, registerForm.tipo, registerForm.email, perfil);
+    login(registerForm.nome, registerForm.email, registerForm.tipo, registerForm.cpf, perfil);
     
     const message = registerForm.tipo === 'fotografo' 
       ? "Bem-vindo! Seu perfil de fotógrafo foi criado (mock)"
@@ -146,6 +164,24 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
           </TabsList>
           
           <TabsContent value="login" className="space-y-4">
+            {/* Demo user chips */}
+            <div className="flex gap-2 mb-4">
+              <Badge 
+                variant="secondary" 
+                className="cursor-pointer hover:bg-secondary/80"
+                onClick={() => fillDemoCredentials('cliente')}
+              >
+                Cliente demo
+              </Badge>
+              <Badge 
+                variant="secondary" 
+                className="cursor-pointer hover:bg-secondary/80"
+                onClick={() => fillDemoCredentials('fotografo')}
+              >
+                Fotógrafo demo
+              </Badge>
+            </div>
+            
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
                 <Label htmlFor="login-email">E-mail</Label>
@@ -171,7 +207,7 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
                 />
               </div>
               
-              <Button type="submit" className="w-full bg-[var(--brand-primary)] hover:bg-[#CC3434]">
+              <Button type="submit" className="w-full">
                 Entrar
               </Button>
             </form>
@@ -322,7 +358,7 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
                 </Label>
               </div>
               
-              <Button type="submit" className="w-full bg-[var(--brand-primary)] hover:bg-[#CC3434]">
+              <Button type="submit" className="w-full">
                 Cadastrar-se
               </Button>
             </form>

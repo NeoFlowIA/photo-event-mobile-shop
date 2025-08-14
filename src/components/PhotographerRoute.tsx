@@ -8,21 +8,21 @@ interface PhotographerRouteProps {
 }
 
 const PhotographerRoute = ({ children }: PhotographerRouteProps) => {
-  const { session } = useSessionMock();
+  const { session, is } = useSessionMock();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!session.loggedIn || session.tipo !== 'fotografo') {
+    if (!session.loggedIn || !is('fotografo')) {
       toast({
         title: "Acesso restrito",
-        description: "Esta área é restrita a fotógrafos cadastrados.",
+        description: "Acesso restrito: área exclusiva para fotógrafos cadastrados.",
         variant: "destructive"
       });
       navigate('/');
     }
-  }, [session, navigate]);
+  }, [session, is, navigate]);
 
-  if (!session.loggedIn || session.tipo !== 'fotografo') {
+  if (!session.loggedIn || !is('fotografo')) {
     return null;
   }
 
