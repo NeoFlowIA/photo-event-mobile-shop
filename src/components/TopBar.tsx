@@ -37,7 +37,7 @@ const TopBar = () => {
           <div className="flex items-center gap-8">
             <div className="flex items-center">
               <img 
-                src="/logo.png" 
+                src="/lovable-uploads/f596c292-f0ef-4243-9d2e-647a4765cfbf.png" 
                 alt="OlhaFoto Logo" 
                 className="h-8" 
                 onError={(e) => {
