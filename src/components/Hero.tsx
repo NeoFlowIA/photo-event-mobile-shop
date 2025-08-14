@@ -2,22 +2,45 @@ import { useState } from 'react';
 import { Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useSessionMock } from '@/hooks/useSessionMock';
+import CpfModal from './CpfModal';
+import HirePhotographerModal from './HirePhotographerModal';
 
 const Hero = () => {
+  const { session } = useSessionMock();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [searchMessage, setSearchMessage] = useState('');
+  const [showCpfModal, setShowCpfModal] = useState(false);
+  const [showHireModal, setShowHireModal] = useState(false);
+  const [pendingAction, setPendingAction] = useState<'selfie' | null>(null);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setSelectedFile(file);
-      setSearchMessage('📸 Foto enviada! Procurando suas fotos... (mock)');
-      setTimeout(() => setSearchMessage(''), 3000);
+      processSelfieSearch();
     }
   };
 
   const handleCameraClick = () => {
+    if (!session.cpf) {
+      setPendingAction('selfie');
+      setShowCpfModal(true);
+      return;
+    }
     document.getElementById('selfie-upload')?.click();
+  };
+
+  const processSelfieSearch = () => {
+    setSearchMessage('📸 Foto enviada! Estamos procurando suas fotos... (mock)');
+    setTimeout(() => setSearchMessage(''), 3000);
+  };
+
+  const handleCpfConfirm = () => {
+    if (pendingAction === 'selfie') {
+      document.getElementById('selfie-upload')?.click();
+    }
+    setPendingAction(null);
   };
 
   return (
@@ -79,9 +102,20 @@ const Hero = () => {
             <span className="text-[var(--brand-accent)]">reviva suas memórias</span>
           </h1>
           
-          <p className="text-lg md:text-xl text-[var(--brand-muted)] max-w-2xl mx-auto mb-8">
+          <p className="text-lg md:text-xl text-[var(--brand-muted)] max-w-2xl mx-auto mb-6">
             Encontre, escolha e eternize cada lembrança.
           </p>
+
+          <div className="mb-8">
+            <Button 
+              onClick={() => setShowHireModal(true)}
+              variant="outline"
+              size="lg"
+              className="text-[var(--brand-primary)] hover:text-[#CC3434] border-[var(--brand-stroke)] hover:bg-[var(--brand-primary)]/5"
+            >
+              Quero contratar um fotógrafo
+            </Button>
+          </div>
 
           {/* Selfie Match Search Bar */}
           <div className="max-w-3xl mx-auto mb-8">
@@ -123,6 +157,17 @@ const Hero = () => {
           </div>
         </div>
       </div>
+      
+      <CpfModal
+        open={showCpfModal}
+        onClose={() => setShowCpfModal(false)}
+        onConfirm={handleCpfConfirm}
+      />
+      
+      <HirePhotographerModal
+        open={showHireModal}
+        onClose={() => setShowHireModal(false)}
+      />
     </section>
   );
 };

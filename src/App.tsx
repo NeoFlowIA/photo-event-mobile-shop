@@ -1,9 +1,10 @@
 
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useSearchParams } from "react-router-dom";
 import Landing from "./pages/Landing";
 import Home from "./pages/Home";
 import SearchPhotos from "./pages/SearchPhotos";
@@ -16,14 +17,51 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Component to handle route-based scroll and modal triggers
+const RouteHandler = () => {
+  const [searchParams] = useSearchParams();
+  
+  useEffect(() => {
+    // Handle /contratar route - scroll to photographers section
+    if (window.location.pathname === '/contratar') {
+      setTimeout(() => {
+        const element = document.querySelector('#encontrar-fotografo');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+    
+    // Handle /fotografos route - scroll to photographers section
+    if (window.location.pathname === '/fotografos') {
+      setTimeout(() => {
+        const element = document.querySelector('#encontrar-fotografo');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+          // Focus first photographer card
+          const firstCard = element.querySelector('button');
+          if (firstCard) {
+            firstCard.focus();
+          }
+        }
+      }, 100);
+    }
+  }, [searchParams]);
+  
+  return null;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <RouteHandler />
         <Routes>
           <Route path="/" element={<Landing />} />
+          <Route path="/contratar" element={<Landing />} />
+          <Route path="/fotografos" element={<Landing />} />
           <Route path="/home" element={<Home userName="João" isPhotographer={true} />} />
           <Route path="/buscar-fotos" element={<SearchPhotos />} />
           <Route path="/buscar-eventos" element={<SearchEvents />} />

@@ -1,12 +1,36 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import photographersData from '@/data/photographers.json';
+import PhotographerProfileDrawer from './PhotographerProfileDrawer';
+import HirePhotographerModal from './HirePhotographerModal';
 
 const PhotographersSpotlight = () => {
   const spotlightPhotographers = photographersData.filter(p => p.spotlight);
+  const [selectedPhotographer, setSelectedPhotographer] = useState<any>(null);
+  const [showDrawer, setShowDrawer] = useState(false);
+  const [showHireModal, setShowHireModal] = useState(false);
+
+  const handleViewProfile = (photographer: any) => {
+    // Add portfolio and additional info for the drawer
+    const fullPhotographer = {
+      ...photographer,
+      city: "Fortaleza, CE",
+      rating: 4.8,
+      specialty: "Eventos esportivos",
+      description: `Especialista em fotografias de eventos esportivos com mais de 5 anos de experiência. Capturo os momentos mais emocionantes com técnica profissional e equipamentos de ponta.`,
+      portfolio: [
+        `https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=300&h=300&fit=crop`,
+        `https://images.unsplash.com/photo-1594736797933-d0302b35c9c0?w=300&h=300&fit=crop`,
+        `https://images.unsplash.com/photo-1611270629081-d53b4f34daa6?w=300&h=300&fit=crop`
+      ]
+    };
+    setSelectedPhotographer(fullPhotographer);
+    setShowDrawer(true);
+  };
 
   return (
-    <section className="py-16">
+    <section id="encontrar-fotografo" className="py-16 scroll-mt-24">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-[var(--brand-secondary)] mb-4">
@@ -48,6 +72,7 @@ const PhotographersSpotlight = () => {
                 <Button 
                   variant="outline" 
                   size="sm"
+                  onClick={() => handleViewProfile(photographer)}
                   className="w-full text-[var(--brand-primary)] hover:text-[#CC3434] border-[var(--brand-stroke)] hover:bg-[var(--brand-primary)]/5 focus:ring-2 focus:ring-[var(--brand-primary)]"
                 >
                   Ver perfil
@@ -58,15 +83,35 @@ const PhotographersSpotlight = () => {
         </div>
         
         <div className="text-center">
-          <Button 
-            variant="outline" 
-            size="lg"
-            className="text-[var(--brand-primary)] hover:text-[#CC3434] border-[var(--brand-stroke)] hover:bg-[var(--brand-primary)]/5 focus:ring-2 focus:ring-[var(--brand-primary)]"
-          >
-            Ver todos os portfólios
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              variant="outline" 
+              size="lg"
+              className="text-[var(--brand-primary)] hover:text-[#CC3434] border-[var(--brand-stroke)] hover:bg-[var(--brand-primary)]/5 focus:ring-2 focus:ring-[var(--brand-primary)]"
+            >
+              Ver todos os portfólios
+            </Button>
+            <Button 
+              onClick={() => setShowHireModal(true)}
+              size="lg"
+              className="bg-[var(--brand-primary)] hover:bg-[#CC3434] text-white focus:ring-2 focus:ring-[var(--brand-primary)]"
+            >
+              Solicitar orçamento
+            </Button>
+          </div>
         </div>
       </div>
+      
+      <PhotographerProfileDrawer
+        open={showDrawer}
+        onClose={() => setShowDrawer(false)}
+        photographer={selectedPhotographer}
+      />
+      
+      <HirePhotographerModal
+        open={showHireModal}
+        onClose={() => setShowHireModal(false)}
+      />
     </section>
   );
 };

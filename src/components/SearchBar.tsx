@@ -3,6 +3,9 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import { useSessionMock } from '@/hooks/useSessionMock';
+import CpfModal from './CpfModal';
 
 interface SearchBarProps {
   onSearch: (query: string, city: string) => void;
@@ -10,11 +13,35 @@ interface SearchBarProps {
 }
 
 const SearchBar = ({ onSearch, onSortChange }: SearchBarProps) => {
+  const { session } = useSessionMock();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
+  const [showCpfModal, setShowCpfModal] = useState(false);
+  const [pendingSearch, setPendingSearch] = useState<{ query: string; city: string } | null>(null);
 
   const handleSearch = () => {
-    onSearch(searchQuery, selectedCity);
+    if (!session.cpf) {
+      setPendingSearch({ query: searchQuery, city: selectedCity });
+      setShowCpfModal(true);
+      return;
+    }
+    
+    executeSearch(searchQuery, selectedCity);
+  };
+
+  const executeSearch = (query: string, city: string) => {
+    onSearch(query, city);
+    toast({
+      title: "🔎 Resultados encontrados",
+      description: `Exibindo resultados para "${query || 'todos os eventos'}"${city ? ` em ${city}` : ''} (mock)`,
+    });
+  };
+
+  const handleCpfConfirm = () => {
+    if (pendingSearch) {
+      executeSearch(pendingSearch.query, pendingSearch.city);
+      setPendingSearch(null);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -84,6 +111,12 @@ const SearchBar = ({ onSearch, onSortChange }: SearchBarProps) => {
           </div>
         </div>
       </div>
+      
+      <CpfModal
+        open={showCpfModal}
+        onClose={() => setShowCpfModal(false)}
+        onConfirm={handleCpfConfirm}
+      />
     </section>
   );
 };
