@@ -1,0 +1,110 @@
+[
+  {
+    "id": "evt-001",
+    "title": "6º NIGHT BIKE CRASA MOTOS",
+    "city": "Fortaleza - CE",
+    "date": "2025-03-18",
+    "venue": "Crasa Motos Yamaha Matriz",
+    "handle": "@jvnl.fotografia",
+    "image": "/images/events/night-bike-1.jpg"
+  },
+  {
+    "id": "evt-002",
+    "title": "Circuito de Natação Praia do Futuro",
+    "city": "Fortaleza - CE",
+    "date": "2025-04-07",
+    "venue": "Arena Beira-Mar",
+    "handle": "@munes.foto",
+    "image": "/images/events/natacao-1.jpg"
+  },
+  {
+    "id": "evt-003",
+    "title": "Copa de Futebol Vila Olímpica",
+    "city": "São Paulo - SP",
+    "date": "2025-03-25",
+    "venue": "Vila Olímpica do Ibirapuera",
+    "handle": "@sporteventos",
+    "image": "/images/events/futebol-1.jpg"
+  },
+  {
+    "id": "evt-004",
+    "title": "Maratona Internacional de São Paulo",
+    "city": "São Paulo - SP",
+    "date": "2025-05-12",
+    "venue": "Parque do Ibirapuera",
+    "handle": "@runningshots",
+    "image": "/images/events/maratona-1.jpg"
+  },
+  {
+    "id": "evt-005",
+    "title": "Triathlon Iron Kids",
+    "city": "Rio de Janeiro - RJ",
+    "date": "2025-04-15",
+    "venue": "Lagoa Rodrigo de Freitas",
+    "handle": "@aquaphoto",
+    "image": "/images/events/triathlon-1.jpg"
+  },
+  {
+    "id": "evt-006",
+    "title": "Festival de Verão Salvador",
+    "city": "Salvador - BA",
+    "date": "2025-06-20",
+    "venue": "Arena Fonte Nova",
+    "handle": "@festivalphotos",
+    "image": "/images/events/festival-1.jpg"
+  },
+  {
+    "id": "evt-007",
+    "title": "CrossFit Open Regional",
+    "city": "Belo Horizonte - MG",
+    "date": "2025-04-28",
+    "venue": "Expominas",
+    "handle": "@crossfitbh",
+    "image": "/images/events/crossfit-1.jpg"
+  },
+  {
+    "id": "evt-008",
+    "title": "Campeonato de Surf Itacoatiara",
+    "city": "Niterói - RJ",
+    "date": "2025-05-03",
+    "venue": "Praia de Itacoatiara",
+    "handle": "@wavephoto",
+    "image": "/images/events/surf-1.jpg"
+  },
+  {
+    "id": "evt-009",
+    "title": "Bike Marathon Campos do Jordão",
+    "city": "Campos do Jordão - SP",
+    "date": "2025-05-18",
+    "venue": "Centro da Cidade",
+    "handle": "@mountainbike",
+    "image": "/images/events/bike-marathon-1.jpg"
+  },
+  {
+    "id": "evt-010",
+    "title": "Open de Tênis Brasília",
+    "city": "Brasília - DF",
+    "date": "2025-06-02",
+    "venue": "Clube de Tênis de Brasília",
+    "handle": "@tennispro",
+    "image": "/images/events/tennis-1.jpg"
+  },
+  {
+    "id": "evt-011",
+    "title": "Corrida Noturna Copacabana",
+    "city": "Rio de Janeiro - RJ",
+    "date": "2025-04-22",
+    "venue": "Orla de Copacabana",
+    "handle": "@nightrun",
+    "image": "/images/events/corrida-noturna-1.jpg"
+  },
+  {
+    "id": "evt-012",
+    "title": "Torneio de Vôlei de Praia",
+    "city": "Recife - PE",
+    "date": "2025-05-30",
+    "venue": "Praia de Boa Viagem",
+    "handle": "@beachvolley",
+    "image": "/images/events/volei-praia-1.jpg"
+  }
+]

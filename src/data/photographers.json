@@ -1,0 +1,30 @@
+[
+  {
+    "id": "ph-001",
+    "name": "João Nunes",
+    "handle": "@munes.foto",
+    "spotlight": true,
+    "image": "/images/photogs/munes.jpg"
+  },
+  {
+    "id": "ph-002",
+    "name": "Giovana Lima",
+    "handle": "@gi.lima",
+    "spotlight": true,
+    "image": "/images/photogs/gi.jpg"
+  },
+  {
+    "id": "ph-003",
+    "name": "Carlos Sports",
+    "handle": "@sporteventos",
+    "spotlight": true,
+    "image": "/images/photogs/carlos.jpg"
+  },
+  {
+    "id": "ph-004",
+    "name": "Ana Aquino",
+    "handle": "@aquaphoto",
+    "spotlight": true,
+    "image": "/images/photogs/ana.jpg"
+  }
+]
