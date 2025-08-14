@@ -88,7 +88,7 @@ const EventsGrid = ({ searchQuery = '', cityFilter = '', sortBy = 'date-desc' }:
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {filteredEvents.map((event) => (
-            <Card key={event.id} className="group hover:shadow-md transition-all duration-300 overflow-hidden rounded-xl">
+            <Card key={event.id} className="group hover:shadow-lg transition-all duration-300 overflow-hidden rounded-xl border shadow-sm">
               <div className="h-48 relative overflow-hidden rounded-t-xl">
                 <img
                   src={event.image}
@@ -96,11 +96,11 @@ const EventsGrid = ({ searchQuery = '', cityFilter = '', sortBy = 'date-desc' }:
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
-                    target.src = `https://via.placeholder.com/400x300/E03A3A/FFFFFF?text=${encodeURIComponent(event.title)}`;
+                    target.src = `https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=300&fit=crop&crop=faces`;
                   }}
                 />
                 <div className="absolute top-3 left-3">
-                  <span className="text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded-md font-medium">
+                  <span className="text-xs bg-white/90 text-gray-700 px-2 py-1 rounded-md font-medium">
                     {event.handle}
                   </span>
                 </div>
@@ -113,17 +113,17 @@ const EventsGrid = ({ searchQuery = '', cityFilter = '', sortBy = 'date-desc' }:
                 
                 <div className="space-y-2 text-sm text-muted-foreground">
                   <div className="flex items-center gap-2">
-                    <MapPin size={14} />
+                    <MapPin size={16} />
                     <span>{event.city}</span>
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <Calendar size={14} />
+                    <Calendar size={16} />
                     <span>{formatDate(event.date)}</span>
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <Building2 size={14} />
+                    <Building2 size={16} />
                     <span className="line-clamp-1">{event.venue}</span>
                   </div>
                 </div>

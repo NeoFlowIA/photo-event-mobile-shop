@@ -6,7 +6,7 @@
     "date": "2025-03-18",
     "venue": "Crasa Motos Yamaha Matriz",
     "handle": "@jvnl.fotografia",
-    "image": "/images/events/night-bike-1.jpg"
+    "image": "https://images.unsplash.com/photo-1558618666-fbd1c5cd4c84?w=400&h=300&fit=crop"
   },
   {
     "id": "evt-002",
@@ -15,7 +15,7 @@
     "date": "2025-04-07",
     "venue": "Arena Beira-Mar",
     "handle": "@munes.foto",
-    "image": "/images/events/natacao-1.jpg"
+    "image": "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop"
   },
   {
     "id": "evt-003",
@@ -24,7 +24,7 @@
     "date": "2025-03-25",
     "venue": "Vila Olímpica do Ibirapuera",
     "handle": "@sporteventos",
-    "image": "/images/events/futebol-1.jpg"
+    "image": "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=400&h=300&fit=crop"
   },
   {
     "id": "evt-004",
@@ -33,7 +33,7 @@
     "date": "2025-05-12",
     "venue": "Parque do Ibirapuera",
     "handle": "@runningshots",
-    "image": "/images/events/maratona-1.jpg"
+    "image": "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=300&fit=crop"
   },
   {
     "id": "evt-005",
@@ -42,7 +42,7 @@
     "date": "2025-04-15",
     "venue": "Lagoa Rodrigo de Freitas",
     "handle": "@aquaphoto",
-    "image": "/images/events/triathlon-1.jpg"
+    "image": "https://images.unsplash.com/photo-1502933691298-84fc14542831?w=400&h=300&fit=crop"
   },
   {
     "id": "evt-006",
@@ -51,7 +51,7 @@
     "date": "2025-06-20",
     "venue": "Arena Fonte Nova",
     "handle": "@festivalphotos",
-    "image": "/images/events/festival-1.jpg"
+    "image": "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop"
   },
   {
     "id": "evt-007",
@@ -60,7 +60,7 @@
     "date": "2025-04-28",
     "venue": "Expominas",
     "handle": "@crossfitbh",
-    "image": "/images/events/crossfit-1.jpg"
+    "image": "https://images.unsplash.com/photo-1571019614332-cea7bb510616?w=400&h=300&fit=crop"
   },
   {
     "id": "evt-008",
@@ -69,7 +69,7 @@
     "date": "2025-05-03",
     "venue": "Praia de Itacoatiara",
     "handle": "@wavephoto",
-    "image": "/images/events/surf-1.jpg"
+    "image": "https://images.unsplash.com/photo-1502933691298-84fc14542831?w=400&h=300&fit=crop"
   },
   {
     "id": "evt-009",
@@ -78,7 +78,7 @@
     "date": "2025-05-18",
     "venue": "Centro da Cidade",
     "handle": "@mountainbike",
-    "image": "/images/events/bike-marathon-1.jpg"
+    "image": "https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=400&h=300&fit=crop"
   },
   {
     "id": "evt-010",
@@ -87,7 +87,7 @@
     "date": "2025-06-02",
     "venue": "Clube de Tênis de Brasília",
     "handle": "@tennispro",
-    "image": "/images/events/tennis-1.jpg"
+    "image": "https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=400&h=300&fit=crop"
   },
   {
     "id": "evt-011",
@@ -96,7 +96,7 @@
     "date": "2025-04-22",
     "venue": "Orla de Copacabana",
     "handle": "@nightrun",
-    "image": "/images/events/corrida-noturna-1.jpg"
+    "image": "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=300&fit=crop"
   },
   {
     "id": "evt-012",
@@ -105,6 +105,6 @@
     "date": "2025-05-30",
     "venue": "Praia de Boa Viagem",
     "handle": "@beachvolley",
-    "image": "/images/events/volei-praia-1.jpg"
+    "image": "https://images.unsplash.com/photo-1594736797933-d0a9ba21de15?w=400&h=300&fit=crop"
   }
 ]

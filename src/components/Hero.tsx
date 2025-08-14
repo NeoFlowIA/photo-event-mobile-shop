@@ -11,7 +11,7 @@ const Hero = () => {
     const file = event.target.files?.[0];
     if (file) {
       setSelectedFile(file);
-      setSearchMessage('📸 Foto enviada! Estamos procurando suas fotos...');
+      setSearchMessage('📸 Foto enviada! Procurando suas fotos... (mock)');
       setTimeout(() => setSearchMessage(''), 3000);
     }
   };
@@ -23,27 +23,51 @@ const Hero = () => {
   return (
     <section className="relative py-20 lg:py-32 overflow-hidden">
       {/* Decorative images - desktop only */}
-      <div className="hidden lg:block absolute left-4 top-1/2 -translate-y-1/2 w-24 space-y-3">
-        <div className="w-16 h-20 bg-gradient-to-br from-primary/20 to-accent/30 rounded-xl rotate-12 opacity-80 shadow-lg overflow-hidden">
-          <div className="w-full h-full bg-gradient-to-br from-red-100 to-red-200 rounded-xl"></div>
+      <div className="hidden lg:block absolute left-4 top-1/2 -translate-y-1/2 w-32 space-y-4">
+        <div className="w-20 h-24 rounded-xl rotate-12 opacity-80 shadow-lg overflow-hidden">
+          <img 
+            src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=150&h=180&fit=crop&crop=faces" 
+            alt="Decorative event photo" 
+            className="w-full h-full object-cover rounded-xl"
+          />
         </div>
-        <div className="w-20 h-16 bg-gradient-to-br from-accent/20 to-primary/30 rounded-xl -rotate-6 opacity-70 shadow-lg overflow-hidden">
-          <div className="w-full h-full bg-gradient-to-br from-red-200 to-red-300 rounded-xl"></div>
+        <div className="w-24 h-20 rounded-xl -rotate-6 opacity-70 shadow-lg overflow-hidden">
+          <img 
+            src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=180&h=150&fit=crop&crop=faces" 
+            alt="Decorative event photo" 
+            className="w-full h-full object-cover rounded-xl"
+          />
         </div>
-        <div className="w-14 h-18 bg-gradient-to-br from-primary/30 to-accent/20 rounded-xl rotate-3 opacity-75 shadow-lg overflow-hidden">
-          <div className="w-full h-full bg-gradient-to-br from-red-150 to-red-250 rounded-xl"></div>
+        <div className="w-18 h-22 rounded-xl rotate-3 opacity-75 shadow-lg overflow-hidden">
+          <img 
+            src="https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=135&h=165&fit=crop&crop=faces" 
+            alt="Decorative event photo" 
+            className="w-full h-full object-cover rounded-xl"
+          />
         </div>
       </div>
       
-      <div className="hidden lg:block absolute right-4 top-1/2 -translate-y-1/2 w-24 space-y-3">
-        <div className="w-20 h-24 bg-gradient-to-br from-accent/30 to-primary/20 rounded-xl -rotate-12 opacity-80 shadow-lg overflow-hidden">
-          <div className="w-full h-full bg-gradient-to-br from-red-200 to-red-300 rounded-xl"></div>
+      <div className="hidden lg:block absolute right-4 top-1/2 -translate-y-1/2 w-32 space-y-4">
+        <div className="w-24 h-28 rounded-xl -rotate-12 opacity-80 shadow-lg overflow-hidden">
+          <img 
+            src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=180&h=210&fit=crop&crop=faces" 
+            alt="Decorative event photo" 
+            className="w-full h-full object-cover rounded-xl"
+          />
         </div>
-        <div className="w-16 h-20 bg-gradient-to-br from-primary/20 to-accent/30 rounded-xl rotate-6 opacity-70 shadow-lg overflow-hidden">
-          <div className="w-full h-full bg-gradient-to-br from-red-100 to-red-200 rounded-xl"></div>
+        <div className="w-20 h-24 rounded-xl rotate-6 opacity-70 shadow-lg overflow-hidden">
+          <img 
+            src="https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=150&h=180&fit=crop&crop=faces" 
+            alt="Decorative event photo" 
+            className="w-full h-full object-cover rounded-xl"
+          />
         </div>
-        <div className="w-22 h-16 bg-gradient-to-br from-accent/20 to-primary/30 rounded-xl -rotate-3 opacity-75 shadow-lg overflow-hidden">
-          <div className="w-full h-full bg-gradient-to-br from-red-250 to-red-200 rounded-xl"></div>
+        <div className="w-26 h-20 rounded-xl -rotate-3 opacity-75 shadow-lg overflow-hidden">
+          <img 
+            src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=195&h=150&fit=crop&crop=faces" 
+            alt="Decorative event photo" 
+            className="w-full h-full object-cover rounded-xl"
+          />
         </div>
       </div>
 
@@ -52,7 +76,7 @@ const Hero = () => {
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-8">
             <span className="text-secondary">Capture a emoção,</span>
             <br />
-            <span style={{ color: '#FF6B6B' }}>reviva suas memórias</span>
+            <span className="text-accent">reviva suas memórias</span>
           </h1>
           
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
@@ -60,15 +84,15 @@ const Hero = () => {
           </p>
 
           {/* Selfie Match Search Bar */}
-          <div className="max-w-2xl mx-auto mb-8">
-            <div className="bg-white rounded-xl shadow-md px-4 py-3 flex flex-col md:flex-row items-center gap-3">
-              <div className="flex items-center gap-3 w-full md:flex-1">
+          <div className="max-w-3xl mx-auto mb-8">
+            <div className="bg-white rounded-xl shadow-md px-4 py-3 flex flex-col sm:flex-row items-center gap-3">
+              <div className="flex items-center gap-3 w-full sm:flex-1">
                 <button 
                   onClick={handleCameraClick}
                   className="flex-shrink-0 text-gray-500 hover:text-primary transition-colors"
-                  aria-label="Enviar foto"
+                  aria-label="Enviar selfie"
                 >
-                  <Camera size={24} />
+                  <Camera size={22} />
                 </button>
                 <Input
                   placeholder="Envie uma selfie para encontrar suas fotos"
@@ -86,13 +110,13 @@ const Hero = () => {
               </div>
               <Button 
                 onClick={handleCameraClick}
-                className="bg-[#E03A3A] hover:bg-red-600 text-white rounded-lg px-4 py-2 whitespace-nowrap"
+                className="bg-[#E03A3A] hover:bg-red-600 text-white rounded-lg px-4 py-2 w-full sm:w-auto whitespace-nowrap"
               >
                 Enviar foto
               </Button>
             </div>
             {searchMessage && (
-              <div className="mt-3 text-sm text-green-600 font-medium">
+              <div className="mt-3 p-2 text-sm text-green-600 font-medium bg-green-50 rounded-lg">
                 {searchMessage}
               </div>
             )}
