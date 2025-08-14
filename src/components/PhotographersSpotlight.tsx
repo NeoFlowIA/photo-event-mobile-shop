@@ -9,10 +9,10 @@ const PhotographersSpotlight = () => {
     <section className="py-16">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-[var(--brand-secondary)] mb-4">
             Encontrar um fotógrafo
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg text-[var(--brand-muted)] max-w-2xl mx-auto">
             Escolha um de nossos especialistas para registrar seu evento!
           </p>
         </div>
@@ -31,24 +31,24 @@ const PhotographersSpotlight = () => {
                   }}
                 />
                 <div className="absolute top-3 left-3">
-                  <span className="text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded-md font-medium">
+                  <span className="text-xs bg-[var(--brand-accent)]/15 text-[var(--brand-accent)] border border-[var(--brand-accent)]/30 px-2 py-1 rounded-md font-medium">
                     Em destaque
                   </span>
                 </div>
               </div>
               
               <CardContent className="p-4 text-center">
-                <h3 className="font-semibold text-lg mb-1">
+                <h3 className="font-semibold text-lg mb-1 text-[var(--brand-secondary)]">
                   {photographer.name}
                 </h3>
-                <p className="text-sm text-muted-foreground mb-4">
+                <p className="text-sm text-[var(--brand-muted)] mb-4">
                   {photographer.handle}
                 </p>
                 
                 <Button 
                   variant="outline" 
                   size="sm"
-                  className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                  className="w-full text-[var(--brand-primary)] hover:text-[#CC3434] border-[var(--brand-stroke)] hover:bg-[var(--brand-primary)]/5 focus:ring-2 focus:ring-[var(--brand-primary)]"
                 >
                   Ver perfil
                 </Button>
@@ -61,7 +61,7 @@ const PhotographersSpotlight = () => {
           <Button 
             variant="outline" 
             size="lg"
-            className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+            className="text-[var(--brand-primary)] hover:text-[#CC3434] border-[var(--brand-stroke)] hover:bg-[var(--brand-primary)]/5 focus:ring-2 focus:ring-[var(--brand-primary)]"
           >
             Ver todos os portfólios
           </Button>

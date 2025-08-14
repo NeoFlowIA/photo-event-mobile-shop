@@ -74,22 +74,22 @@ const Hero = () => {
       <div className="container mx-auto px-4 text-center">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-8">
-            <span className="text-secondary">Capture a emoção,</span>
+            <span className="text-[var(--brand-secondary)]">Capture a emoção,</span>
             <br />
-            <span className="text-accent">reviva suas memórias</span>
+            <span className="text-[var(--brand-accent)]">reviva suas memórias</span>
           </h1>
           
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
+          <p className="text-lg md:text-xl text-[var(--brand-muted)] max-w-2xl mx-auto mb-8">
             Encontre, escolha e eternize cada lembrança.
           </p>
 
           {/* Selfie Match Search Bar */}
           <div className="max-w-3xl mx-auto mb-8">
-            <div className="bg-white rounded-xl shadow-md px-4 py-3 flex flex-col sm:flex-row items-center gap-3">
+            <div className="bg-[var(--brand-surface)] rounded-xl shadow-md px-4 py-3 flex flex-col sm:flex-row items-center gap-3 text-[var(--brand-text)]">
               <div className="flex items-center gap-3 w-full sm:flex-1">
                 <button 
                   onClick={handleCameraClick}
-                  className="flex-shrink-0 text-gray-500 hover:text-primary transition-colors"
+                  className="flex-shrink-0 text-[#6B7280] hover:text-[var(--brand-primary)] transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-primary)]"
                   aria-label="Enviar selfie"
                 >
                   <Camera size={22} />
@@ -110,7 +110,7 @@ const Hero = () => {
               </div>
               <Button 
                 onClick={handleCameraClick}
-                className="bg-[#E03A3A] hover:bg-red-600 text-white rounded-lg px-4 py-2 w-full sm:w-auto whitespace-nowrap"
+                className="bg-[var(--brand-primary)] hover:bg-[#CC3434] text-white rounded-lg px-4 py-2 w-full sm:w-auto whitespace-nowrap focus:ring-2 focus:ring-[var(--brand-primary)]"
               >
                 Enviar foto
               </Button>

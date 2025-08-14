@@ -33,7 +33,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {footerSections.map((section) => (
             <div key={section.title}>
-              <h3 className="font-semibold text-foreground mb-4">
+              <h3 className="font-semibold text-[var(--brand-secondary)] mb-4">
                 {section.title}
               </h3>
               <ul className="space-y-3">
@@ -41,7 +41,7 @@ const Footer = () => {
                   <li key={link.name}>
                     <a 
                       href={link.href}
-                      className="text-muted-foreground hover:text-foreground transition-colors text-sm"
+                      className="text-[var(--brand-muted)] hover:text-[var(--brand-primary)] transition-colors text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-primary)]"
                     >
                       {link.name}
                     </a>
@@ -52,8 +52,8 @@ const Footer = () => {
           ))}
         </div>
         
-        <div className="border-t border-border mt-8 pt-8 text-center">
-          <p className="text-muted-foreground text-sm">
+        <div className="border-t border-[var(--brand-stroke)] mt-8 pt-8 text-center">
+          <p className="text-[var(--brand-muted)] text-sm">
             © 2025 OlhaFoto. Todos os direitos reservados.
           </p>
         </div>

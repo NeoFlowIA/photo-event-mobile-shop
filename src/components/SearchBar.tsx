@@ -34,14 +34,14 @@ const SearchBar = ({ onSearch, onSortChange }: SearchBarProps) => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="h-12 rounded-xl px-4 py-2 border-input focus-visible:ring-1"
+                className="h-12 rounded-xl px-4 py-2 bg-[var(--brand-surface)] border border-[var(--brand-stroke)] text-[var(--brand-text)] focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-[var(--brand-primary)]"
                 aria-label="Pesquisar eventos"
               />
             </div>
             
             <div className="w-full lg:w-48">
               <Select onValueChange={setSelectedCity} aria-label="Selecionar cidade">
-                <SelectTrigger className="h-12 rounded-xl px-4 py-2">
+                <SelectTrigger className="h-12 rounded-xl px-4 py-2 bg-[var(--brand-surface)] border border-[var(--brand-stroke)] text-[var(--brand-text)] focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-[var(--brand-primary)]">
                   <SelectValue placeholder="Cidade ▾" />
                 </SelectTrigger>
                 <SelectContent>
@@ -61,7 +61,7 @@ const SearchBar = ({ onSearch, onSortChange }: SearchBarProps) => {
             
             <Button 
               onClick={handleSearch}
-              className="h-12 px-8 bg-[#E03A3A] hover:bg-red-600 text-white rounded-xl"
+              className="h-12 px-8 bg-[var(--brand-primary)] hover:bg-[#CC3434] text-white rounded-xl focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-primary)]"
               aria-label="Pesquisar eventos"
             >
               <Search size={18} className="mr-2" />
@@ -70,7 +70,7 @@ const SearchBar = ({ onSearch, onSortChange }: SearchBarProps) => {
             
             <div className="w-full lg:w-48">
               <Select onValueChange={onSortChange} aria-label="Ordenar por">
-                <SelectTrigger className="h-12 rounded-xl px-4 py-2">
+                <SelectTrigger className="h-12 rounded-xl px-4 py-2 bg-[var(--brand-surface)] border border-[var(--brand-stroke)] text-[var(--brand-text)] focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-[var(--brand-primary)]">
                   <SelectValue placeholder="Ordenar por ▾" />
                 </SelectTrigger>
                 <SelectContent>

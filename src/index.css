@@ -36,6 +36,16 @@
     --ring: 354 82% 53%;
 
     --radius: 0.75rem;
+
+    /* Brand Color Tokens */
+    --brand-primary: #E03A3A;
+    --brand-secondary: #0A1F44;
+    --brand-accent: #FF6B6B;
+    --brand-bg: #F7F9FC;
+    --brand-surface: #FFFFFF;
+    --brand-text: #111827;
+    --brand-muted: #6B7280;
+    --brand-stroke: #E5E7EB;
   }
 }
 

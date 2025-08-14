@@ -32,30 +32,30 @@ const HowItWorks = () => {
     <section className="py-16 bg-muted/20">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-[var(--brand-secondary)] mb-4">
             Como funciona
           </h2>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {steps.map((step) => (
-            <div key={step.number} className="text-center">
+            <div key={step.number} className="text-center bg-[var(--brand-surface)] rounded-xl border border-[var(--brand-stroke)] p-6 shadow-sm">
               <div className="relative mb-6">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <div className="text-primary">
+                <div className="w-16 h-16 bg-[var(--brand-primary)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="text-[var(--brand-primary)]">
                     {step.icon}
                   </div>
                 </div>
-                <div className="absolute -top-2 -right-2 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-lg font-bold">
+                <div className="absolute -top-2 -right-2 w-8 h-8 bg-[var(--brand-primary)] text-white rounded-full flex items-center justify-center text-lg font-bold">
                   {step.number}
                 </div>
               </div>
               
-              <h3 className="text-lg font-semibold text-foreground mb-3">
+              <h3 className="text-lg font-semibold text-[var(--brand-secondary)] mb-3">
                 {step.title}
               </h3>
               
-              <p className="text-muted-foreground text-sm leading-relaxed">
+              <p className="text-[var(--brand-muted)] text-sm leading-relaxed">
                 {step.description}
               </p>
             </div>

@@ -2,19 +2,19 @@ import { Button } from '@/components/ui/button';
 
 const ContactCTA = () => {
   return (
-    <section className="py-16 bg-gray-100/50">
+    <section className="py-16 bg-[var(--brand-bg)]">
       <div className="container mx-auto px-4">
-        <div className="bg-white rounded-xl p-6 lg:p-8 grid lg:grid-cols-2 gap-6 shadow-sm">
+        <div className="bg-[var(--brand-surface)] border border-[var(--brand-stroke)] rounded-xl p-6 lg:p-8 grid lg:grid-cols-2 gap-6 shadow-sm">
           <div>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold text-[var(--brand-secondary)] mb-6">
               Precisa de um fotógrafo?
             </h2>
-            <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
+            <p className="text-lg text-[var(--brand-text)] mb-6 leading-relaxed">
               Você necessita de um fotógrafo para melhorar as vendas, quer registrar um momento especial ou quer nos contratar para cobrir seu evento? Na Olha a Foto você encontra um serviço de extrema qualidade para registrar cada emoção
             </p>
             <Button 
               size="lg"
-              className="bg-[#E03A3A] hover:bg-red-600 text-white px-8"
+              className="bg-[var(--brand-primary)] hover:bg-[#CC3434] text-white px-8 focus:ring-2 focus:ring-[var(--brand-primary)]"
             >
               Entrar em contato
             </Button>

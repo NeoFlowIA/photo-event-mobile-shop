@@ -87,8 +87,8 @@ const EventsGrid = ({ searchQuery = '', cityFilter = '', sortBy = 'date-desc' }:
     <section className="py-12">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          {filteredEvents.map((event) => (
-            <Card key={event.id} className="group hover:shadow-lg transition-all duration-300 overflow-hidden rounded-xl border shadow-sm">
+           {filteredEvents.map((event) => (
+            <Card key={event.id} className="group hover:shadow-lg transition-all duration-300 overflow-hidden rounded-xl bg-[var(--brand-surface)] border border-[var(--brand-stroke)] shadow-sm">
               <div className="h-48 relative overflow-hidden rounded-t-xl">
                 <img
                   src={event.image}
@@ -100,30 +100,30 @@ const EventsGrid = ({ searchQuery = '', cityFilter = '', sortBy = 'date-desc' }:
                   }}
                 />
                 <div className="absolute top-3 left-3">
-                  <span className="text-xs bg-white/90 text-gray-700 px-2 py-1 rounded-md font-medium">
+                  <span className="text-xs bg-white/85 backdrop-blur text-[var(--brand-secondary)] border border-[var(--brand-stroke)] px-2 py-1 rounded-md font-medium">
                     {event.handle}
                   </span>
                 </div>
               </div>
               
               <CardContent className="p-4">
-                <h3 className="font-semibold text-lg mb-3 line-clamp-2 group-hover:text-primary transition-colors">
+                <h3 className="font-semibold text-lg mb-3 line-clamp-2 text-[var(--brand-secondary)] group-hover:text-[var(--brand-primary)] transition-colors">
                   {event.title}
                 </h3>
                 
-                <div className="space-y-2 text-sm text-muted-foreground">
+                <div className="space-y-2 text-sm text-[var(--brand-muted)]">
                   <div className="flex items-center gap-2">
-                    <MapPin size={16} />
+                    <MapPin size={16} className="text-[var(--brand-muted)]" />
                     <span>{event.city}</span>
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <Calendar size={16} />
+                    <Calendar size={16} className="text-[var(--brand-muted)]" />
                     <span>{formatDate(event.date)}</span>
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <Building2 size={16} />
+                    <Building2 size={16} className="text-[var(--brand-muted)]" />
                     <span className="line-clamp-1">{event.venue}</span>
                   </div>
                 </div>
@@ -136,7 +136,7 @@ const EventsGrid = ({ searchQuery = '', cityFilter = '', sortBy = 'date-desc' }:
           <Button 
             variant="outline" 
             size="lg"
-            className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+            className="text-[var(--brand-primary)] hover:text-[#CC3434] border-[var(--brand-stroke)] hover:bg-[var(--brand-primary)]/5 focus:ring-2 focus:ring-[var(--brand-primary)]"
           >
             Ver todos os eventos
           </Button>

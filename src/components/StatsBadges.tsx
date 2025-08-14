@@ -24,16 +24,16 @@ const StatsBadges = () => {
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-center items-center gap-6 lg:gap-12">
           {stats.map((stat, index) => (
-            <div key={index} className="text-center bg-white rounded-xl shadow-sm p-6 min-w-[280px]">
+            <div key={index} className="text-center bg-[var(--brand-surface)] rounded-xl shadow-sm border border-[var(--brand-stroke)]/60 p-6 min-w-[280px]">
               <div className="mb-2">
-                <span className="text-2xl lg:text-3xl font-bold text-primary">
+                <span className="text-2xl lg:text-3xl font-bold text-[var(--brand-primary)]">
                   {stat.value}
                 </span>
-                <span className="text-2xl lg:text-3xl font-bold text-secondary ml-2">
+                <span className="text-2xl lg:text-3xl font-bold text-[var(--brand-secondary)] ml-2">
                   {stat.label}
                 </span>
               </div>
-              <p className="text-sm text-muted-foreground max-w-[200px] mx-auto">
+              <p className="text-sm text-[var(--brand-muted)] max-w-[200px] mx-auto">
                 {stat.subtitle}
               </p>
             </div>
