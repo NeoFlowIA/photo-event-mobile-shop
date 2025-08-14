@@ -34,14 +34,14 @@ const SearchBar = ({ onSearch, onSortChange }: SearchBarProps) => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="h-12"
+                className="h-12 rounded-xl px-4 py-2"
                 aria-label="Pesquisar eventos"
               />
             </div>
             
             <div className="w-full lg:w-48">
               <Select onValueChange={setSelectedCity} aria-label="Selecionar cidade">
-                <SelectTrigger className="h-12">
+                <SelectTrigger className="h-12 rounded-xl px-4 py-2">
                   <SelectValue placeholder="Cidade ▾" />
                 </SelectTrigger>
                 <SelectContent>
@@ -61,7 +61,7 @@ const SearchBar = ({ onSearch, onSortChange }: SearchBarProps) => {
             
             <Button 
               onClick={handleSearch}
-              className="h-12 px-8 bg-primary hover:bg-primary/90"
+              className="h-12 px-8 bg-[#E03A3A] hover:bg-red-600 text-white rounded-xl"
               aria-label="Pesquisar eventos"
             >
               <Search size={18} className="mr-2" />
@@ -70,7 +70,7 @@ const SearchBar = ({ onSearch, onSortChange }: SearchBarProps) => {
             
             <div className="w-full lg:w-48">
               <Select onValueChange={onSortChange} aria-label="Ordenar por">
-                <SelectTrigger className="h-12">
+                <SelectTrigger className="h-12 rounded-xl px-4 py-2">
                   <SelectValue placeholder="Ordenar por ▾" />
                 </SelectTrigger>
                 <SelectContent>

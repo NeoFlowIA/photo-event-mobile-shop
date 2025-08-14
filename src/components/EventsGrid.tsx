@@ -88,8 +88,8 @@ const EventsGrid = ({ searchQuery = '', cityFilter = '', sortBy = 'date-desc' }:
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {filteredEvents.map((event) => (
-            <Card key={event.id} className="group hover:shadow-lg transition-all duration-300 overflow-hidden">
-              <div className="aspect-[4/3] relative overflow-hidden">
+            <Card key={event.id} className="group hover:shadow-md transition-all duration-300 overflow-hidden rounded-xl">
+              <div className="h-48 relative overflow-hidden rounded-t-xl">
                 <img
                   src={event.image}
                   alt={event.title}
