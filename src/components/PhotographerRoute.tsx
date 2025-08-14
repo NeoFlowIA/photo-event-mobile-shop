@@ -8,11 +8,12 @@ interface PhotographerRouteProps {
 }
 
 const PhotographerRoute = ({ children }: PhotographerRouteProps) => {
-  const { session, is } = useSessionMock();
+  const { session, is, hydrated } = useSessionMock();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!session.loggedIn || !is('fotografo')) {
+    // Only check access after session is hydrated from localStorage
+    if (hydrated && (!session.loggedIn || !is('fotografo'))) {
       toast({
         title: "Acesso restrito",
         description: "Acesso restrito: área exclusiva para fotógrafos cadastrados.",
@@ -20,9 +21,10 @@ const PhotographerRoute = ({ children }: PhotographerRouteProps) => {
       });
       navigate('/');
     }
-  }, [session, is, navigate]);
+  }, [session, is, navigate, hydrated]);
 
-  if (!session.loggedIn || !is('fotografo')) {
+  // Show nothing while hydrating or if no access
+  if (!hydrated || !session.loggedIn || !is('fotografo')) {
     return null;
   }
 

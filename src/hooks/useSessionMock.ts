@@ -34,6 +34,7 @@ const defaultSession: SessionData = {
 
 export const useSessionMock = () => {
   const [session, setSession] = useState<SessionData>(defaultSession);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -45,6 +46,7 @@ export const useSessionMock = () => {
         console.warn('Failed to parse session from localStorage', error);
       }
     }
+    setHydrated(true);
   }, []);
 
   const updateSession = (updates: Partial<SessionData>) => {
@@ -89,6 +91,7 @@ export const useSessionMock = () => {
 
   return {
     session,
+    hydrated,
     loginWith,
     login,
     logout,

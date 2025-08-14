@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 const DebugSessionBadge = () => {
-  const { session, loginWith, logout, DEMO_USERS } = useSessionMock();
+  const { session, loginWith, logout, DEMO_USERS, hydrated } = useSessionMock();
 
   // Only show in development
   if (process.env.NODE_ENV !== 'development') {
@@ -29,6 +29,7 @@ const DebugSessionBadge = () => {
       <div className="text-xs space-y-1 mb-2">
         <div>role: <Badge variant="outline">{session.role || 'null'}</Badge></div>
         <div>loggedIn: <Badge variant="outline">{session.loggedIn ? 'true' : 'false'}</Badge></div>
+        <div>hydrated: <Badge variant="outline">{hydrated ? 'true' : 'false'}</Badge></div>
         <div>nome: <Badge variant="outline">{session.nome || 'null'}</Badge></div>
       </div>
       <div className="flex gap-1 flex-wrap">
