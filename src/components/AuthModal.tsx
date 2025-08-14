@@ -25,6 +25,12 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
     acceptTerms: false
   });
 
+  // Mock users database
+  const mockUsers = [
+    { email: "joao@teste.com", senha: "123456", nome: "João Silva", cpf: "123.456.789-09", role: "cliente" },
+    { email: "foto@teste.com", senha: "123456", nome: "Ana Aquino", handle: "@aquaphoto", role: "fotografo" }
+  ];
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (!loginForm.email || !loginForm.password) {
@@ -35,11 +41,23 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
       });
       return;
     }
+
+    // Find user in mock database
+    const user = mockUsers.find(u => u.email === loginForm.email && u.senha === loginForm.password);
     
-    login("João", registerForm.cpf || undefined);
+    if (!user) {
+      toast({
+        title: "Credenciais inválidas",
+        description: "Email ou senha incorretos.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    login(user.nome, user.cpf);
     toast({
       title: "Login realizado!",
-      description: "Bem-vindo de volta.",
+      description: `Bem-vindo, ${user.nome}!`,
     });
     onClose();
   };

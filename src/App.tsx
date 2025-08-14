@@ -13,6 +13,7 @@ import Cart from "./pages/Cart";
 import History from "./pages/History";
 import Profile from "./pages/Profile";
 import AddCredit from "./pages/AddCredit";
+import Portfolios from "./pages/Portfolios";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,17 @@ const RouteHandler = () => {
   const [searchParams] = useSearchParams();
   
   useEffect(() => {
+    // Handle /?to=contratar - scroll to photographers section
+    const toParam = searchParams.get('to');
+    if (toParam === 'contratar' && window.location.pathname === '/') {
+      setTimeout(() => {
+        const element = document.querySelector('#encontrar-fotografo');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+    
     // Handle /contratar route - scroll to photographers section
     if (window.location.pathname === '/contratar') {
       setTimeout(() => {
@@ -44,6 +56,14 @@ const RouteHandler = () => {
             firstCard.focus();
           }
         }
+      }, 100);
+    }
+    
+    // Handle /?login=1 parameter - dispatch custom event to open auth modal
+    const loginParam = searchParams.get('login');
+    if (loginParam === '1' && window.location.pathname === '/') {
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('openAuthModal'));
       }, 100);
     }
   }, [searchParams]);
@@ -69,6 +89,7 @@ const App = () => (
           <Route path="/historico" element={<History />} />
           <Route path="/perfil" element={<Profile />} />
           <Route path="/adicionar-credito" element={<AddCredit />} />
+          <Route path="/portfolios" element={<Portfolios />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

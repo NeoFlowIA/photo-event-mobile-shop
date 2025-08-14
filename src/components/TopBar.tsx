@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, Camera, Search, User, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,13 @@ const TopBar = () => {
   const navigate = useNavigate();
   const { session, logout } = useSessionMock();
   const [showAuthModal, setShowAuthModal] = useState(false);
+
+  // Listen for custom event to open auth modal
+  useEffect(() => {
+    const handleOpenAuthModal = () => setShowAuthModal(true);
+    window.addEventListener('openAuthModal', handleOpenAuthModal);
+    return () => window.removeEventListener('openAuthModal', handleOpenAuthModal);
+  }, []);
 
   const scrollToPhotographers = () => {
     const element = document.querySelector('#encontrar-fotografo');

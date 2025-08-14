@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import photographersData from '@/data/photographers.json';
@@ -6,6 +7,7 @@ import PhotographerProfileDrawer from './PhotographerProfileDrawer';
 import HirePhotographerModal from './HirePhotographerModal';
 
 const PhotographersSpotlight = () => {
+  const navigate = useNavigate();
   const spotlightPhotographers = photographersData.filter(p => p.spotlight);
   const [selectedPhotographer, setSelectedPhotographer] = useState<any>(null);
   const [showDrawer, setShowDrawer] = useState(false);
@@ -87,6 +89,7 @@ const PhotographersSpotlight = () => {
             <Button 
               variant="outline" 
               size="lg"
+              onClick={() => navigate('/portfolios')}
               className="text-[var(--brand-primary)] hover:text-[#CC3434] border-[var(--brand-stroke)] hover:bg-[var(--brand-primary)]/5 focus:ring-2 focus:ring-[var(--brand-primary)]"
             >
               Ver todos os portfólios
