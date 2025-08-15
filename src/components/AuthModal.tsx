@@ -8,6 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Badge } from '@/components/ui/badge';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { formatCpf, validateCpf } from '@/lib/cpfValidation';
 import { useSessionMock } from '@/hooks/useSessionMock';
@@ -36,6 +37,7 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
     fotoPerfil: null as File | null,
     fotoCapa: null as File | null
   });
+  const [currentStep, setCurrentStep] = useState(1);
 
   // Check for deep link params to auto-fill login
   useEffect(() => {
@@ -92,33 +94,77 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
     }
   };
 
+  const validateStep = (step: number) => {
+    switch (step) {
+      case 1:
+        if (!registerForm.nome || !registerForm.email || !registerForm.password || !registerForm.tipo) {
+          toast({
+            title: "Campos obrigatórios",
+            description: "Por favor, preencha todos os campos.",
+            variant: "destructive"
+          });
+          return false;
+        }
+        return true;
+      case 2:
+        if (registerForm.tipo === 'cliente') {
+          if (!registerForm.cpf || !validateCpf(registerForm.cpf)) {
+            toast({
+              title: "CPF inválido",
+              description: "Por favor, verifique o CPF informado.",
+              variant: "destructive"
+            });
+            return false;
+          }
+          if (!registerForm.acceptTerms) {
+            toast({
+              title: "Termos de uso",
+              description: "É necessário aceitar os termos de uso.",
+              variant: "destructive"
+            });
+            return false;
+          }
+        }
+        return true;
+      case 3:
+        if (registerForm.tipo === 'fotografo') {
+          if (!registerForm.cpf || !validateCpf(registerForm.cpf)) {
+            toast({
+              title: "CPF inválido",
+              description: "Por favor, verifique o CPF informado.",
+              variant: "destructive"
+            });
+            return false;
+          }
+          if (!registerForm.acceptTerms) {
+            toast({
+              title: "Termos de uso",
+              description: "É necessário aceitar os termos de uso.",
+              variant: "destructive"
+            });
+            return false;
+          }
+        }
+        return true;
+      default:
+        return true;
+    }
+  };
+
+  const handleNext = () => {
+    if (validateStep(currentStep)) {
+      setCurrentStep(prev => prev + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    setCurrentStep(prev => prev - 1);
+  };
+
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!registerForm.nome || !registerForm.email || !registerForm.cpf || !registerForm.password) {
-      toast({
-        title: "Campos obrigatórios",
-        description: "Por favor, preencha todos os campos.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (!validateCpf(registerForm.cpf)) {
-      toast({
-        title: "CPF inválido",
-        description: "Por favor, verifique o CPF informado.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (!registerForm.acceptTerms) {
-      toast({
-        title: "Termos de uso",
-        description: "É necessário aceitar os termos de uso.",
-        variant: "destructive"
-      });
+    if (!validateStep(currentStep)) {
       return;
     }
 
@@ -142,6 +188,7 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
       title: "Cadastro realizado!",
       description: message,
     });
+    setCurrentStep(1);
     onClose();
   };
 
@@ -216,61 +263,95 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
           </TabsContent>
           
           <TabsContent value="register" className="space-y-4">
+            <div className="mb-4">
+              {/* Progress indicator */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex space-x-2">
+                  {[1, 2, 3].map((step) => (
+                    <div
+                      key={step}
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                        step <= currentStep
+                          ? 'bg-primary text-primary-foreground'
+                          : step <= currentStep + 1 && registerForm.tipo === 'fotografo'
+                          ? 'bg-muted text-muted-foreground'
+                          : step === 2 && registerForm.tipo === 'cliente'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted text-muted-foreground'
+                      }`}
+                    >
+                      {step}
+                    </div>
+                  ))}
+                </div>
+                <span className="text-sm text-muted-foreground">
+                  {registerForm.tipo === 'cliente' ? 
+                    `Etapa ${currentStep} de 2` : 
+                    `Etapa ${currentStep} de 3`
+                  }
+                </span>
+              </div>
+            </div>
+
             <form onSubmit={handleRegister} className="space-y-4">
-              <div>
-                <Label>Tipo de conta</Label>
-                <RadioGroup
-                  value={registerForm.tipo}
-                  onValueChange={(value) => setRegisterForm(prev => ({ ...prev, tipo: value as 'cliente' | 'fotografo' }))}
-                  className="flex flex-row gap-4 mt-2"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="cliente" id="cliente" />
-                    <Label htmlFor="cliente">Cliente</Label>
+              {currentStep === 1 && (
+                <>
+                  <div>
+                    <Label>Tipo de conta</Label>
+                    <RadioGroup
+                      value={registerForm.tipo}
+                      onValueChange={(value) => setRegisterForm(prev => ({ ...prev, tipo: value as 'cliente' | 'fotografo' }))}
+                      className="flex flex-row gap-4 mt-2"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="cliente" id="cliente" />
+                        <Label htmlFor="cliente">Cliente</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="fotografo" id="fotografo" />
+                        <Label htmlFor="fotografo">Fotógrafo</Label>
+                      </div>
+                    </RadioGroup>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="fotografo" id="fotografo" />
-                    <Label htmlFor="fotografo">Fotógrafo</Label>
+
+                  <div>
+                    <Label htmlFor="register-name">Nome completo</Label>
+                    <Input
+                      id="register-name"
+                      value={registerForm.nome}
+                      onChange={(e) => setRegisterForm(prev => ({ ...prev, nome: e.target.value }))}
+                      placeholder="Seu nome completo"
+                      required
+                    />
                   </div>
-                </RadioGroup>
-              </div>
+                  
+                  <div>
+                    <Label htmlFor="register-email">E-mail</Label>
+                    <Input
+                      id="register-email"
+                      type="email"
+                      value={registerForm.email}
+                      onChange={(e) => setRegisterForm(prev => ({ ...prev, email: e.target.value }))}
+                      placeholder="seu@email.com"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="register-password">Senha</Label>
+                    <Input
+                      id="register-password"
+                      type="password"
+                      value={registerForm.password}
+                      onChange={(e) => setRegisterForm(prev => ({ ...prev, password: e.target.value }))}
+                      placeholder="••••••••"
+                      required
+                    />
+                  </div>
+                </>
+              )}
 
-              <div>
-                <Label htmlFor="register-name">Nome completo</Label>
-                <Input
-                  id="register-name"
-                  value={registerForm.nome}
-                  onChange={(e) => setRegisterForm(prev => ({ ...prev, nome: e.target.value }))}
-                  placeholder="Seu nome completo"
-                  required
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="register-email">E-mail</Label>
-                <Input
-                  id="register-email"
-                  type="email"
-                  value={registerForm.email}
-                  onChange={(e) => setRegisterForm(prev => ({ ...prev, email: e.target.value }))}
-                  placeholder="seu@email.com"
-                  required
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="register-password">Senha</Label>
-                <Input
-                  id="register-password"
-                  type="password"
-                  value={registerForm.password}
-                  onChange={(e) => setRegisterForm(prev => ({ ...prev, password: e.target.value }))}
-                  placeholder="••••••••"
-                  required
-                />
-              </div>
-
-              {registerForm.tipo === 'fotografo' && (
+              {currentStep === 2 && registerForm.tipo === 'fotografo' && (
                 <>
                   <div>
                     <Label htmlFor="register-bio">Biografia</Label>
@@ -312,57 +393,86 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
                       placeholder="@seuinstagram, behance.net/seuportfolio"
                     />
                   </div>
+                </>
+              )}
 
+              {((currentStep === 2 && registerForm.tipo === 'cliente') || 
+                (currentStep === 3 && registerForm.tipo === 'fotografo')) && (
+                <>
+                  {registerForm.tipo === 'fotografo' && (
+                    <>
+                      <div>
+                        <Label htmlFor="register-foto-perfil">Foto de Perfil</Label>
+                        <Input
+                          id="register-foto-perfil"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => setRegisterForm(prev => ({ ...prev, fotoPerfil: e.target.files?.[0] || null }))}
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="register-foto-capa">Foto de Capa</Label>
+                        <Input
+                          id="register-foto-capa"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => setRegisterForm(prev => ({ ...prev, fotoCapa: e.target.files?.[0] || null }))}
+                        />
+                      </div>
+                    </>
+                  )}
+                  
                   <div>
-                    <Label htmlFor="register-foto-perfil">Foto de Perfil</Label>
+                    <Label htmlFor="register-cpf">CPF</Label>
                     <Input
-                      id="register-foto-perfil"
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => setRegisterForm(prev => ({ ...prev, fotoPerfil: e.target.files?.[0] || null }))}
+                      id="register-cpf"
+                      value={registerForm.cpf}
+                      onChange={(e) => handleCpfChange(e.target.value)}
+                      placeholder="000.000.000-00"
+                      maxLength={14}
+                      required
                     />
                   </div>
-
-                  <div>
-                    <Label htmlFor="register-foto-capa">Foto de Capa</Label>
-                    <Input
-                      id="register-foto-capa"
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => setRegisterForm(prev => ({ ...prev, fotoCapa: e.target.files?.[0] || null }))}
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="terms"
+                      checked={registerForm.acceptTerms}
+                      onCheckedChange={(checked) => 
+                        setRegisterForm(prev => ({ ...prev, acceptTerms: !!checked }))
+                      }
                     />
+                    <Label htmlFor="terms" className="text-sm">
+                      Aceito os termos de uso e política de privacidade
+                    </Label>
                   </div>
                 </>
               )}
               
-              <div>
-                <Label htmlFor="register-cpf">CPF</Label>
-                <Input
-                  id="register-cpf"
-                  value={registerForm.cpf}
-                  onChange={(e) => handleCpfChange(e.target.value)}
-                  placeholder="000.000.000-00"
-                  maxLength={14}
-                  required
-                />
+              <div className="flex gap-2">
+                {currentStep > 1 && (
+                  <Button type="button" variant="outline" onClick={handlePrevious} className="flex-1">
+                    <ChevronLeft className="w-4 h-4 mr-2" />
+                    Anterior
+                  </Button>
+                )}
+                
+                {((currentStep === 1) || 
+                  (currentStep === 2 && registerForm.tipo === 'fotografo')) && (
+                  <Button type="button" onClick={handleNext} className="flex-1">
+                    Próximo
+                    <ChevronRight className="w-4 h-4 ml-2" />
+                  </Button>
+                )}
+                
+                {((currentStep === 2 && registerForm.tipo === 'cliente') || 
+                  (currentStep === 3 && registerForm.tipo === 'fotografo')) && (
+                  <Button type="submit" className="flex-1">
+                    Cadastrar-se
+                  </Button>
+                )}
               </div>
-              
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="terms"
-                  checked={registerForm.acceptTerms}
-                  onCheckedChange={(checked) => 
-                    setRegisterForm(prev => ({ ...prev, acceptTerms: !!checked }))
-                  }
-                />
-                <Label htmlFor="terms" className="text-sm">
-                  Aceito os termos de uso e política de privacidade
-                </Label>
-              </div>
-              
-              <Button type="submit" className="w-full">
-                Cadastrar-se
-              </Button>
             </form>
           </TabsContent>
         </Tabs>
