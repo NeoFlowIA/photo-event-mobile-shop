@@ -21,6 +21,7 @@ import PhotographerEventDetails from "./pages/PhotographerEventDetails";
 import PhotographerCollaborations from "./pages/PhotographerCollaborations";
 import PhotographerRoute from "./components/PhotographerRoute";
 import DebugSessionBadge from "./components/DebugSessionBadge";
+import EventDetail from "./pages/EventDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -98,6 +99,9 @@ const App = () => (
           <Route path="/perfil" element={<Profile />} />
           <Route path="/adicionar-credito" element={<AddCredit />} />
           <Route path="/portfolios" element={<Portfolios />} />
+          
+          {/* Event Detail Route */}
+          <Route path="/eventos/:slug" element={<EventDetail />} />
           
           {/* Photographer Routes */}
           <Route path="/fotografo/portfolio" element={

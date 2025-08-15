@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MapPin, Calendar, Building2 } from 'lucide-react';
 import eventsData from '@/data/events.json';
+import { createEventSlug } from '@/lib/slugify';
 
 interface Event {
   id: string;
@@ -88,47 +90,53 @@ const EventsGrid = ({ searchQuery = '', cityFilter = '', sortBy = 'date-desc' }:
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
            {filteredEvents.map((event) => (
-            <Card key={event.id} className="group hover:shadow-lg transition-all duration-300 overflow-hidden rounded-xl bg-[var(--brand-surface)] border border-[var(--brand-stroke)] shadow-sm">
-              <div className="h-48 relative overflow-hidden rounded-t-xl">
-                <img
-                  src={event.image}
-                  alt={event.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = `https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=300&fit=crop&crop=faces`;
-                  }}
-                />
-                <div className="absolute top-3 left-3">
-                  <span className="text-xs bg-white/85 backdrop-blur text-[var(--brand-secondary)] border border-[var(--brand-stroke)] px-2 py-1 rounded-md font-medium">
-                    {event.handle}
-                  </span>
+            <Link 
+              key={event.id} 
+              to={`/eventos/${createEventSlug(event.title)}`}
+              className="block"
+            >
+              <Card className="group hover:shadow-lg transition-all duration-300 overflow-hidden rounded-xl bg-[var(--brand-surface)] border border-[var(--brand-stroke)] shadow-sm">
+                <div className="h-48 relative overflow-hidden rounded-t-xl">
+                  <img
+                    src={event.image}
+                    alt={event.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = `https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=300&fit=crop&crop=faces`;
+                    }}
+                  />
+                  <div className="absolute top-3 left-3">
+                    <span className="text-xs bg-white/85 backdrop-blur text-[var(--brand-secondary)] border border-[var(--brand-stroke)] px-2 py-1 rounded-md font-medium">
+                      {event.handle}
+                    </span>
+                  </div>
                 </div>
-              </div>
-              
-              <CardContent className="p-4">
-                <h3 className="font-semibold text-lg mb-3 line-clamp-2 text-[var(--brand-secondary)] group-hover:text-[var(--brand-primary)] transition-colors">
-                  {event.title}
-                </h3>
                 
-                <div className="space-y-2 text-sm text-[var(--brand-muted)]">
-                  <div className="flex items-center gap-2">
-                    <MapPin size={16} className="text-[var(--brand-muted)]" />
-                    <span>{event.city}</span>
-                  </div>
+                <CardContent className="p-4">
+                  <h3 className="font-semibold text-lg mb-3 line-clamp-2 text-[var(--brand-secondary)] group-hover:text-[var(--brand-primary)] transition-colors">
+                    {event.title}
+                  </h3>
                   
-                  <div className="flex items-center gap-2">
-                    <Calendar size={16} className="text-[var(--brand-muted)]" />
-                    <span>{formatDate(event.date)}</span>
+                  <div className="space-y-2 text-sm text-[var(--brand-muted)]">
+                    <div className="flex items-center gap-2">
+                      <MapPin size={16} className="text-[var(--brand-muted)]" />
+                      <span>{event.city}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Calendar size={16} className="text-[var(--brand-muted)]" />
+                      <span>{formatDate(event.date)}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Building2 size={16} className="text-[var(--brand-muted)]" />
+                      <span className="line-clamp-1">{event.venue}</span>
+                    </div>
                   </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <Building2 size={16} className="text-[var(--brand-muted)]" />
-                    <span className="line-clamp-1">{event.venue}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
         
