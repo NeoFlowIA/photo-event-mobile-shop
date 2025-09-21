@@ -10,18 +10,36 @@ import PhotographerProfileDrawer from '@/components/PhotographerProfileDrawer';
 import HirePhotographerModal from '@/components/HirePhotographerModal';
 import photographersData from '@/data/photographers.json';
 
+type SpotlightPhotographer = {
+  id: string;
+  name: string;
+  handle: string;
+  image: string;
+  spotlight?: boolean;
+};
+
+type PortfolioPhotographer = SpotlightPhotographer & {
+  city: string;
+  category: string;
+  rating: string;
+  specialty: string;
+  description: string;
+  portfolio: string[];
+};
+
 const ITEMS_PER_PAGE = 12;
 
 // Generate additional mock photographers to have 24 total
-const generateMockPhotographers = () => {
+const generateMockPhotographers = (): PortfolioPhotographer[] => {
   const cities = ['Fortaleza, CE', 'Recife, PE', 'Brasília, DF', 'São Paulo, SP', 'Rio de Janeiro, RJ', 'Belo Horizonte, MG'];
   const categories = ['Corrida de rua', 'Triathlon', 'Ciclismo', 'Show', 'Casamento', 'Corporativo'];
   const names = ['Carlos Lima', 'Maria Santos', 'Pedro Costa', 'Ana Oliveira', 'José Silva', 'Paula Ferreira', 'Bruno Alves', 'Camila Rocha', 'Rafael Souza', 'Luciana Mendes'];
-  
-  const additionalPhotographers = [];
+
+  const basePhotographers = photographersData as SpotlightPhotographer[];
+  const additionalPhotographers: PortfolioPhotographer[] = [];
   for (let i = 0; i < 20; i++) {
     additionalPhotographers.push({
-      id: photographersData.length + i + 1,
+      id: String(basePhotographers.length + i + 1),
       name: names[i % names.length] + ` ${i + 1}`,
       handle: `@foto${i + 1}`,
       image: `https://images.unsplash.com/photo-${1517841905240 + i}?w=300&h=300&fit=crop&auto=format`,
@@ -38,11 +56,12 @@ const generateMockPhotographers = () => {
     });
   }
   
-  return [...photographersData.map((p, index) => ({
-    ...p,
-    city: cities[index % cities.length],
-    category: categories[index % categories.length],
-    rating: (4.5 + Math.random() * 0.5).toFixed(1),
+  return [
+    ...basePhotographers.map((p, index) => ({
+      ...p,
+      city: cities[index % cities.length],
+      category: categories[index % categories.length],
+      rating: (4.5 + Math.random() * 0.5).toFixed(1),
     specialty: categories[index % categories.length],
     description: `Fotógrafo especializado em ${categories[index % categories.length].toLowerCase()} com experiência profissional.`,
     portfolio: [
@@ -55,13 +74,13 @@ const generateMockPhotographers = () => {
 
 const Portfolios = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [photographers] = useState(generateMockPhotographers());
-  const [filteredPhotographers, setFilteredPhotographers] = useState(photographers);
+  const [photographers] = useState<PortfolioPhotographer[]>(generateMockPhotographers());
+  const [filteredPhotographers, setFilteredPhotographers] = useState<PortfolioPhotographer[]>(photographers);
   const [currentPage, setCurrentPage] = useState(1);
   const [cityFilter, setCityFilter] = useState(searchParams.get('cidade') || '');
   const [categoryFilter, setCategoryFilter] = useState(searchParams.get('categoria') || '');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedPhotographer, setSelectedPhotographer] = useState<any>(null);
+  const [selectedPhotographer, setSelectedPhotographer] = useState<PortfolioPhotographer | null>(null);
   const [showDrawer, setShowDrawer] = useState(false);
   const [showHireModal, setShowHireModal] = useState(false);
 
@@ -70,15 +89,15 @@ const Portfolios = () => {
     let filtered = photographers;
 
     if (cityFilter) {
-      filtered = filtered.filter(p => p.city.includes(cityFilter));
+      filtered = filtered.filter((p) => p.city.includes(cityFilter));
     }
 
     if (categoryFilter) {
-      filtered = filtered.filter(p => p.category === categoryFilter);
+      filtered = filtered.filter((p) => p.category === categoryFilter);
     }
 
     if (searchQuery) {
-      filtered = filtered.filter(p => 
+      filtered = filtered.filter((p) =>
         p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.handle.toLowerCase().includes(searchQuery.toLowerCase())
       );
@@ -103,7 +122,7 @@ const Portfolios = () => {
   const cities = ['Fortaleza', 'Recife', 'Brasília', 'São Paulo', 'Rio de Janeiro', 'Belo Horizonte'];
   const categories = ['Corrida de rua', 'Triathlon', 'Ciclismo', 'Show', 'Casamento', 'Corporativo'];
 
-  const handleViewProfile = (photographer: any) => {
+  const handleViewProfile = (photographer: PortfolioPhotographer) => {
     setSelectedPhotographer(photographer);
     setShowDrawer(true);
   };

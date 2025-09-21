@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, Camera, Search, User, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { useSessionMock } from '@/hooks/useSessionMock';
+import { useAuth } from '@/contexts/AuthContext';
 import AuthModal from './AuthModal';
 
 const TopBar = () => {
   const navigate = useNavigate();
-  const { session, logout, is } = useSessionMock();
+  const { user, logout, isPhotographer, isUser, isAuthenticated, pendingAction } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Listen for custom event to open auth modal
@@ -25,9 +25,12 @@ const TopBar = () => {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } finally {
+      navigate('/');
+    }
   };
 
   return (
@@ -58,12 +61,12 @@ const TopBar = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            {session.loggedIn ? (
+            {isAuthenticated ? (
               <>
                 <nav className="hidden sm:flex items-center gap-4">
-                  {is('fotografo') ? (
+                  {isPhotographer ? (
                     <>
-                      <button 
+                      <button
                         onClick={() => navigate('/fotografo/portfolio')}
                         className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
                         aria-label="Meu Portfólio"
@@ -81,9 +84,9 @@ const TopBar = () => {
                         <span className="hidden md:inline">Meus Eventos</span>
                       </button>
                     </>
-                  ) : is('cliente') ? (
+                  ) : isUser ? (
                     <>
-                      <button 
+                      <button
                         onClick={() => navigate('/carrinho')}
                         className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
                         aria-label="Carrinho"
@@ -108,7 +111,7 @@ const TopBar = () => {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="sm" className="flex items-center gap-2">
                       <User size={16} />
-                      <span className="hidden md:inline">{session.nome}</span>
+                      <span className="hidden md:inline">{user?.displayName}</span>
                       <ChevronDown size={14} />
                     </Button>
                   </DropdownMenuTrigger>
@@ -116,7 +119,7 @@ const TopBar = () => {
                     <DropdownMenuItem onClick={() => navigate('/perfil')}>
                       Meu Perfil
                     </DropdownMenuItem>
-                    {is('fotografo') && (
+                    {isPhotographer && (
                       <DropdownMenuItem onClick={() => navigate('/fotografo/eventos/novo')}>
                         Criar Evento
                       </DropdownMenuItem>
@@ -128,11 +131,12 @@ const TopBar = () => {
                 </DropdownMenu>
               </>
             ) : (
-              <Button 
+              <Button
                 onClick={() => setShowAuthModal(true)}
                 variant="ghost"
                 size="sm"
                 className="text-sm font-medium"
+                disabled={pendingAction === 'login' || pendingAction === 'register'}
               >
                 Entrar / Cadastrar-se
               </Button>
@@ -140,11 +144,11 @@ const TopBar = () => {
           </div>
         </div>
       </div>
-      
-      
-      <AuthModal 
-        open={showAuthModal} 
-        onClose={() => setShowAuthModal(false)} 
+
+
+      <AuthModal
+        open={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
       />
     </header>
   );

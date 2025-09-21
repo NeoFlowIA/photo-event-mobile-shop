@@ -23,6 +23,7 @@ import PhotographerRoute from "./components/PhotographerRoute";
 import DebugSessionBadge from "./components/DebugSessionBadge";
 import EventDetail from "./pages/EventDetail";
 import NotFound from "./pages/NotFound";
+import { AuthProvider } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
@@ -81,13 +82,14 @@ const RouteHandler = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <DebugSessionBadge />
-      <BrowserRouter>
-        <RouteHandler />
-        <Routes>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <DebugSessionBadge />
+        <BrowserRouter>
+          <RouteHandler />
+          <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/contratar" element={<Landing />} />
           <Route path="/fotografos" element={<Landing />} />
@@ -132,9 +134,10 @@ const App = () => (
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

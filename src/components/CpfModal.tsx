@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from '@/hooks/use-toast';
 import { formatCpf, validateCpf } from '@/lib/cpfValidation';
-import { useSessionMock } from '@/hooks/useSessionMock';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface CpfModalProps {
   open: boolean;
@@ -15,8 +15,8 @@ interface CpfModalProps {
 }
 
 const CpfModal = ({ open, onClose, onConfirm }: CpfModalProps) => {
-  const { saveCpf } = useSessionMock();
-  const [cpf, setCpf] = useState('');
+  const { setCpf } = useAuth();
+  const [cpf, setCpfValue] = useState('');
   const [saveForFuture, setSaveForFuture] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -32,7 +32,7 @@ const CpfModal = ({ open, onClose, onConfirm }: CpfModalProps) => {
     }
 
     if (saveForFuture) {
-      saveCpf(cpf);
+      setCpf(cpf);
     }
     
     toast({
@@ -42,12 +42,12 @@ const CpfModal = ({ open, onClose, onConfirm }: CpfModalProps) => {
     
     onConfirm();
     onClose();
-    setCpf('');
+    setCpfValue('');
     setSaveForFuture(false);
   };
 
   const handleCpfChange = (value: string) => {
-    setCpf(formatCpf(value));
+    setCpfValue(formatCpf(value));
   };
 
   return (

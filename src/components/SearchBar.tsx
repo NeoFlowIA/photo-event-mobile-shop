@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { useSessionMock } from '@/hooks/useSessionMock';
+import { useAuth } from '@/contexts/AuthContext';
 import CpfModal from './CpfModal';
 
 interface SearchBarProps {
@@ -13,14 +13,14 @@ interface SearchBarProps {
 }
 
 const SearchBar = ({ onSearch, onSortChange }: SearchBarProps) => {
-  const { session } = useSessionMock();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [showCpfModal, setShowCpfModal] = useState(false);
   const [pendingSearch, setPendingSearch] = useState<{ query: string; city: string } | null>(null);
 
   const handleSearch = () => {
-    if (!session.cpf) {
+    if (!user?.cpf) {
       setPendingSearch({ query: searchQuery, city: selectedCity });
       setShowCpfModal(true);
       return;

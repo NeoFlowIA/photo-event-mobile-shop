@@ -1,6 +1,6 @@
 import { ReactNode, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSessionMock } from '@/hooks/useSessionMock';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
 interface PhotographerRouteProps {
@@ -8,12 +8,12 @@ interface PhotographerRouteProps {
 }
 
 const PhotographerRoute = ({ children }: PhotographerRouteProps) => {
-  const { session, is, hydrated } = useSessionMock();
+  const { isAuthenticated, isPhotographer, isInitializing } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Only check access after session is hydrated from localStorage
-    if (hydrated && (!session.loggedIn || !is('fotografo'))) {
+    // Only check access after auth initialization
+    if (!isInitializing && (!isAuthenticated || !isPhotographer)) {
       toast({
         title: "Acesso restrito",
         description: "Acesso restrito: área exclusiva para fotógrafos cadastrados.",
@@ -21,10 +21,10 @@ const PhotographerRoute = ({ children }: PhotographerRouteProps) => {
       });
       navigate('/');
     }
-  }, [session, is, navigate, hydrated]);
+  }, [isAuthenticated, isPhotographer, isInitializing, navigate]);
 
-  // Show nothing while hydrating or if no access
-  if (!hydrated || !session.loggedIn || !is('fotografo')) {
+  // Show nothing while initializing or if no access
+  if (isInitializing || !isAuthenticated || !isPhotographer) {
     return null;
   }
 

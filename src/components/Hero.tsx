@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useSessionMock } from '@/hooks/useSessionMock';
+import { useAuth } from '@/contexts/AuthContext';
 import CpfModal from './CpfModal';
 import HirePhotographerModal from './HirePhotographerModal';
 
 const Hero = () => {
-  const { session } = useSessionMock();
+  const { user } = useAuth();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [searchMessage, setSearchMessage] = useState('');
   const [showCpfModal, setShowCpfModal] = useState(false);
@@ -23,7 +23,7 @@ const Hero = () => {
   };
 
   const handleCameraClick = () => {
-    if (!session.cpf) {
+    if (!user?.cpf) {
       setPendingAction('selfie');
       setShowCpfModal(true);
       return;

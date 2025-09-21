@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Camera, Edit, ExternalLink, Phone, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -6,19 +6,28 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useSessionMock } from '@/hooks/useSessionMock';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import Header from '@/components/Header';
 
 const PhotographerPortfolio = () => {
-  const { session, updateSession } = useSessionMock();
+  const { user, updateUser } = useAuth();
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editForm, setEditForm] = useState({
-    bio: session.perfil?.bio || '',
-    telefone: session.perfil?.telefone || '',
-    website: session.perfil?.website || '',
-    redes: session.perfil?.redes || ''
+    bio: user?.photographerProfile?.biography || '',
+    telefone: user?.photographerProfile?.phoneNumber || '',
+    website: user?.photographerProfile?.websiteUrl || '',
+    redes: user?.photographerProfile?.socialLinks || ''
   });
+
+  useEffect(() => {
+    setEditForm({
+      bio: user?.photographerProfile?.biography || '',
+      telefone: user?.photographerProfile?.phoneNumber || '',
+      website: user?.photographerProfile?.websiteUrl || '',
+      redes: user?.photographerProfile?.socialLinks || ''
+    });
+  }, [user?.photographerProfile]);
 
   const mockPortfolioImages = [
     'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=400&fit=crop',
@@ -30,10 +39,13 @@ const PhotographerPortfolio = () => {
   ];
 
   const handleSaveProfile = () => {
-    updateSession({
-      perfil: {
-        ...session.perfil,
-        ...editForm
+    updateUser({
+      photographerProfile: {
+        ...user?.photographerProfile,
+        biography: editForm.bio,
+        phoneNumber: editForm.telefone,
+        websiteUrl: editForm.website,
+        socialLinks: editForm.redes,
       }
     });
     
@@ -52,10 +64,10 @@ const PhotographerPortfolio = () => {
       <div className="container mx-auto px-4 py-8">
         {/* Cover Image */}
         <div className="relative h-64 mb-8 rounded-lg overflow-hidden bg-gradient-to-r from-primary/20 to-accent/20">
-          {session.perfil?.urlCapa ? (
-            <img 
-              src={session.perfil.urlCapa} 
-              alt="Capa do perfil" 
+          {user?.photographerProfile?.coverImageUrl ? (
+            <img
+              src={user.photographerProfile.coverImageUrl}
+              alt="Capa do perfil"
               className="w-full h-full object-cover"
             />
           ) : (
@@ -69,10 +81,10 @@ const PhotographerPortfolio = () => {
         <div className="flex flex-col md:flex-row gap-8 mb-8">
           <div className="flex-shrink-0">
             <div className="w-32 h-32 rounded-full overflow-hidden bg-muted flex items-center justify-center">
-              {session.perfil?.urlPerfil ? (
-                <img 
-                  src={session.perfil.urlPerfil} 
-                  alt="Foto de perfil" 
+              {user?.photographerProfile?.profileImageUrl ? (
+                <img
+                  src={user.photographerProfile.profileImageUrl}
+                  alt="Foto de perfil"
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -84,36 +96,41 @@ const PhotographerPortfolio = () => {
           <div className="flex-1">
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold">{session.nome}</h1>
-                <p className="text-xl text-muted-foreground mb-2">{session.perfil?.handle}</p>
-                <p className="text-muted-foreground mb-4">{session.perfil?.bio}</p>
-                
+                <h1 className="text-3xl font-bold">{user?.displayName}</h1>
+                <p className="text-xl text-muted-foreground mb-2">{user?.photographerProfile?.handle}</p>
+                <p className="text-muted-foreground mb-4">{user?.photographerProfile?.biography}</p>
+
                 <div className="flex flex-col gap-2">
-                  {session.perfil?.telefone && (
+                  {user?.photographerProfile?.phoneNumber && (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Phone size={16} />
-                      <span>{session.perfil.telefone}</span>
+                      <span>{user.photographerProfile.phoneNumber}</span>
                     </div>
                   )}
-                  
-                  {session.email && (
+
+                  {user?.email && (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Mail size={16} />
-                      <span>{session.email}</span>
+                      <span>{user.email}</span>
                     </div>
                   )}
-                  
-                  {session.perfil?.website && (
+
+                  {user?.photographerProfile?.websiteUrl && (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <ExternalLink size={16} />
-                      <a href={session.perfil.website} target="_blank" rel="noopener noreferrer" className="hover:text-primary">
-                        {session.perfil.website}
+                      <a
+                        href={user.photographerProfile.websiteUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-primary"
+                      >
+                        {user.photographerProfile.websiteUrl}
                       </a>
                     </div>
                   )}
-                  
-                  {session.perfil?.redes && (
-                    <p className="text-sm text-muted-foreground">{session.perfil.redes}</p>
+
+                  {user?.photographerProfile?.socialLinks && (
+                    <p className="text-sm text-muted-foreground">{user.photographerProfile.socialLinks}</p>
                   )}
                 </div>
               </div>

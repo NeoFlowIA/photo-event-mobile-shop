@@ -6,16 +6,32 @@ import photographersData from '@/data/photographers.json';
 import PhotographerProfileDrawer from './PhotographerProfileDrawer';
 import HirePhotographerModal from './HirePhotographerModal';
 
+type Photographer = {
+  id: string;
+  name: string;
+  handle: string;
+  spotlight: boolean;
+  image: string;
+};
+
+type SpotlightPhotographer = Photographer & {
+  city: string;
+  rating: number;
+  specialty: string;
+  description: string;
+  portfolio: string[];
+};
+
 const PhotographersSpotlight = () => {
   const navigate = useNavigate();
-  const spotlightPhotographers = photographersData.filter(p => p.spotlight);
-  const [selectedPhotographer, setSelectedPhotographer] = useState<any>(null);
+  const spotlightPhotographers = (photographersData as Photographer[]).filter((p) => p.spotlight);
+  const [selectedPhotographer, setSelectedPhotographer] = useState<SpotlightPhotographer | null>(null);
   const [showDrawer, setShowDrawer] = useState(false);
   const [showHireModal, setShowHireModal] = useState(false);
 
-  const handleViewProfile = (photographer: any) => {
+  const handleViewProfile = (photographer: Photographer) => {
     // Add portfolio and additional info for the drawer
-    const fullPhotographer = {
+    const fullPhotographer: SpotlightPhotographer = {
       ...photographer,
       city: "Fortaleza, CE",
       rating: 4.8,
