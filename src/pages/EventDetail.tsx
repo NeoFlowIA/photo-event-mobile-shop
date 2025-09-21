@@ -11,7 +11,7 @@ import Navbar from '@/components/Navbar';
 import PhotoGallery from '@/components/PhotoGallery';
 import { getEventBySlug, getEventById, getRelatedEvents, EventDetail } from '@/data/eventsMock';
 import { useCart } from '@/hooks/useCart';
-import { useSessionMock } from '@/hooks/useSessionMock';
+import { useAuth } from '@/contexts/AuthContext';
 import CpfModal from '@/components/CpfModal';
 import { toast } from '@/components/ui/use-toast';
 
@@ -23,7 +23,7 @@ const EventDetailPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showCpfModal, setShowCpfModal] = useState(false);
   const { count } = useCart();
-  const { session } = useSessionMock();
+  const { user } = useAuth();
 
   useEffect(() => {
     if (!slug) {
@@ -94,7 +94,7 @@ const EventDetailPage = () => {
   };
 
   const handleSelfieMatch = () => {
-    if (!session.cpf) {
+    if (!user?.cpf) {
       setShowCpfModal(true);
     } else {
       // Open selfie match dialog (would implement the actual selfie matching component)
