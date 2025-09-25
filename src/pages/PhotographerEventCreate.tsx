@@ -20,7 +20,8 @@ const PhotographerEventCreate = () => {
     data: '',
     local: '',
     categoria: '',
-    precoBase: ''
+    precoBase: '',
+    capa: '',
   });
   const [categories, setCategories] = useState<EventCategory[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
@@ -71,7 +72,9 @@ const PhotographerEventCreate = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!eventForm.nome || !eventForm.data || !eventForm.local || !eventForm.categoria) {
+    const coverUrl = eventForm.capa.trim();
+
+    if (!eventForm.nome || !eventForm.data || !eventForm.local || !eventForm.categoria || !coverUrl) {
       toast({
         title: "Campos obrigatórios",
         description: "Por favor, preencha todos os campos obrigatórios.",
@@ -118,6 +121,7 @@ const PhotographerEventCreate = () => {
           status: 'draft',
           visibility: 'public',
           category_id: eventForm.categoria,
+          cover_url: coverUrl,
         },
         accessToken
       );
@@ -205,6 +209,20 @@ const PhotographerEventCreate = () => {
                     </p>
                   )}
                 </div>
+              </div>
+
+              <div>
+                <Label htmlFor="capa">Imagem de capa *</Label>
+                <Input
+                  id="capa"
+                  value={eventForm.capa}
+                  onChange={(e) => setEventForm(prev => ({ ...prev, capa: e.target.value }))}
+                  placeholder="Cole o link da imagem de destaque do evento"
+                  required
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Use uma URL de imagem pública que represente o evento.
+                </p>
               </div>
 
               <div>

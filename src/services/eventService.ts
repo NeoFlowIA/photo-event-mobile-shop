@@ -203,7 +203,7 @@ export async function listPhotographerEvents(ownerId: string, token: string, sig
   const where = {
     _and: [
       { owner_id: { _eq: ownerId } },
-      { status: { _nlike: "archived" } },
+      { status: { _neq: "archived" } },
     ],
   } as const;
 
@@ -273,6 +273,7 @@ export interface CreateEventInput {
   status?: string;
   visibility?: string;
   category_id: string;
+  cover_url: string;
   slug?: string;
 }
 
