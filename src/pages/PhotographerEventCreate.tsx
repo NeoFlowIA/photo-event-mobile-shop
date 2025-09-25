@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import Header from '@/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
-import { createEvent } from '@/services/eventService';
+import { createEvent, listEventCategories, type EventCategory } from '@/services/eventService';
 
 const PhotographerEventCreate = () => {
   const navigate = useNavigate();
@@ -22,19 +22,51 @@ const PhotographerEventCreate = () => {
     categoria: '',
     precoBase: ''
   });
+  const [categories, setCategories] = useState<EventCategory[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const categories = [
-    'Corrida de rua',
-    'Triathlon',
-    'Ciclismo',
-    'Maratona',
-    'Natação',
-    'Show',
-    'Festival',
-    'Evento corporativo',
-    'Outro'
-  ];
+  useEffect(() => {
+    if (!accessToken) {
+      setCategories([]);
+      setIsLoadingCategories(false);
+      return;
+    }
+
+    const abortController = new AbortController();
+    setIsLoadingCategories(true);
+
+    listEventCategories(accessToken, abortController.signal)
+      .then((fetched) => {
+        setCategories(fetched);
+      })
+      .catch((error) => {
+        if (abortController.signal.aborted) return;
+        console.error('Erro ao carregar categorias', error);
+        toast({
+          title: 'Não foi possível carregar as categorias',
+          description: 'Tente novamente mais tarde.',
+          variant: 'destructive',
+        });
+      })
+      .finally(() => {
+        if (!abortController.signal.aborted) {
+          setIsLoadingCategories(false);
+        }
+      });
+
+    return () => {
+      abortController.abort();
+    };
+  }, [accessToken]);
+
+  useEffect(() => {
+    if (!eventForm.categoria) return;
+    const exists = categories.some((category) => category.id === eventForm.categoria);
+    if (!exists) {
+      setEventForm((prev) => ({ ...prev, categoria: '' }));
+    }
+  }, [categories, eventForm.categoria]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,6 +117,7 @@ const PhotographerEventCreate = () => {
           owner_id: user.id,
           status: 'draft',
           visibility: 'public',
+          category_id: eventForm.categoria,
         },
         accessToken
       );
@@ -155,15 +188,22 @@ const PhotographerEventCreate = () => {
                 <div>
                   <Label htmlFor="categoria">Categoria *</Label>
                   <Select value={eventForm.categoria} onValueChange={(value) => setEventForm(prev => ({ ...prev, categoria: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione a categoria" />
+                    <SelectTrigger disabled={isLoadingCategories || categories.length === 0}>
+                      <SelectValue placeholder={isLoadingCategories ? 'Carregando categorias...' : 'Selecione a categoria'} />
                     </SelectTrigger>
                     <SelectContent>
-                      {categories.map(category => (
-                        <SelectItem key={category} value={category}>{category}</SelectItem>
+                      {categories.map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                  {!isLoadingCategories && categories.length === 0 && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Nenhuma categoria disponível no momento.
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -192,7 +232,15 @@ const PhotographerEventCreate = () => {
               </div>
 
               <div className="flex gap-4 pt-4">
-                <Button type="submit" className="flex-1" disabled={isSubmitting}>
+                <Button
+                  type="submit"
+                  className="flex-1"
+                  disabled={
+                    isSubmitting ||
+                    isLoadingCategories ||
+                    categories.length === 0
+                  }
+                >
                   {isSubmitting ? 'Criando...' : 'Criar Evento'}
                 </Button>
                 <Button

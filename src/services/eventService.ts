@@ -26,6 +26,12 @@ export interface EventDetail extends EventSummary {
   published_at?: string | null;
 }
 
+export interface EventCategory {
+  id: string;
+  name: string;
+  slug?: string | null;
+}
+
 export interface SearchEventsParams {
   searchTerm?: string;
   city?: string;
@@ -115,6 +121,16 @@ const EVENT_BY_SLUG_QUERY = /* GraphQL */ `
       created_at
       updated_at
       published_at
+    }
+  }
+`;
+
+const LIST_EVENT_CATEGORIES_QUERY = /* GraphQL */ `
+  query EventCategories {
+    event_categories(order_by: { name: asc }) {
+      id
+      name
+      slug
     }
   }
 `;
@@ -231,6 +247,19 @@ export async function getEventBySlug(slug: string, token?: string | null, signal
   return data.events[0] ?? null;
 }
 
+export async function listEventCategories(token?: string | null, signal?: AbortSignal) {
+  const data = await graphqlRequest<{ event_categories: EventCategory[] }>(
+    LIST_EVENT_CATEGORIES_QUERY,
+    {},
+    {
+      token: token ?? undefined,
+      useAdminSecret: token ? false : true,
+      signal,
+    }
+  );
+  return data.event_categories;
+}
+
 export interface CreateEventInput {
   title: string;
   description?: string | null;
@@ -243,6 +272,7 @@ export interface CreateEventInput {
   owner_id: string;
   status?: string;
   visibility?: string;
+  category_id: string;
   slug?: string;
 }
 
