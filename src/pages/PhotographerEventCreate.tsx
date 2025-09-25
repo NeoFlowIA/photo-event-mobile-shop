@@ -8,9 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import Header from '@/components/Header';
+import { useAuth } from '@/contexts/AuthContext';
+import { createEvent } from '@/services/eventService';
 
 const PhotographerEventCreate = () => {
   const navigate = useNavigate();
+  const { user, accessToken } = useAuth();
   const [eventForm, setEventForm] = useState({
     nome: '',
     descricao: '',
@@ -19,6 +22,7 @@ const PhotographerEventCreate = () => {
     categoria: '',
     precoBase: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const categories = [
     'Corrida de rua',
@@ -32,9 +36,9 @@ const PhotographerEventCreate = () => {
     'Outro'
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!eventForm.nome || !eventForm.data || !eventForm.local || !eventForm.categoria) {
       toast({
         title: "Campos obrigatórios",
@@ -44,16 +48,63 @@ const PhotographerEventCreate = () => {
       return;
     }
 
-    // Mock creation - generate random ID
-    const eventId = Math.random().toString(36).substr(2, 9);
-    
-    toast({
-      title: "Evento criado (mock)!",
-      description: `O evento "${eventForm.nome}" foi criado com sucesso.`,
-    });
-    
-    // Redirect to event details
-    navigate(`/fotografo/eventos/${eventId}`);
+    if (!user?.id || !accessToken) {
+      toast({
+        title: 'Sessão expirada',
+        description: 'Faça login novamente para criar um evento.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const parseLocation = (value: string) => {
+      if (!value) return { city: null, state: null };
+      const sanitized = value.replace(/,/g, '-');
+      const [cityPart, statePart] = sanitized.split('-').map((part) => part.trim());
+      return {
+        city: cityPart || null,
+        state: statePart || null,
+      };
+    };
+
+    try {
+      setIsSubmitting(true);
+      const { city, state } = parseLocation(eventForm.local);
+      const startAt = new Date(`${eventForm.data}T00:00:00`);
+      const basePriceCents = eventForm.precoBase ? Math.round(parseFloat(eventForm.precoBase) * 100) : null;
+
+      const created = await createEvent(
+        {
+          title: eventForm.nome,
+          description: eventForm.descricao || null,
+          start_at: Number.isNaN(startAt.getTime()) ? new Date().toISOString() : startAt.toISOString(),
+          city,
+          state,
+          venue_name: city,
+          base_price_cents: basePriceCents,
+          owner_id: user.id,
+          status: 'draft',
+          visibility: 'public',
+        },
+        accessToken
+      );
+
+      toast({
+        title: 'Evento criado!',
+        description: `O evento "${created.title}" foi criado com sucesso.`,
+      });
+
+      navigate(`/fotografo/eventos/${created.id}`);
+    } catch (error) {
+      console.error('Erro ao criar evento', error);
+      toast({
+        title: 'Erro ao criar evento',
+        description: error instanceof Error ? error.message : 'Não foi possível criar o evento.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -141,12 +192,12 @@ const PhotographerEventCreate = () => {
               </div>
 
               <div className="flex gap-4 pt-4">
-                <Button type="submit" className="flex-1">
-                  Criar Evento
+                <Button type="submit" className="flex-1" disabled={isSubmitting}>
+                  {isSubmitting ? 'Criando...' : 'Criar Evento'}
                 </Button>
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => navigate('/fotografo/eventos')}
                   className="flex-1"
                 >

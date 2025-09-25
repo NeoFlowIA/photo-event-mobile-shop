@@ -1,58 +1,79 @@
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import Header from '../components/Header';
 import Navbar from '../components/Navbar';
-
-// Mock events data
-const mockEvents = [
-  {
-    id: 1,
-    imageUrl: 'https://images.unsplash.com/photo-1541625602330-2277a4c46182',
-    name: '6º NIGHT BIKE CRASA MOTOS',
-    location: 'Fortaleza CE',
-    date: '18/02/2023',
-    photographer: 'Crasa Motos Yamaha Matriz',
-  },
-  {
-    id: 2,
-    imageUrl: 'https://images.unsplash.com/photo-1517649763962-0c623066013b',
-    name: '7º NIGHT BIKE CRASA MOTOS',
-    location: 'Fortaleza CE',
-    date: '25/03/2023',
-    photographer: 'Crasa Motos Yamaha Matriz',
-  },
-  {
-    id: 3,
-    imageUrl: 'https://images.unsplash.com/photo-1541625810516-44f1ce894bcd',
-    name: 'CORRIDA DA PRIMAVERA',
-    location: 'Fortaleza CE',
-    date: '15/04/2023',
-    photographer: 'Foto Esportes',
-  },
-  {
-    id: 4,
-    imageUrl: 'https://images.unsplash.com/photo-1517649281203-dad836b4abe5',
-    name: 'MARATONA DE FORTALEZA',
-    location: 'Fortaleza CE',
-    date: '22/05/2023',
-    photographer: 'Atleta Fotografia',
-  }
-];
+import { EventSummary, searchEvents } from '@/services/eventService';
 
 const SearchEvents = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [events, setEvents] = useState(mockEvents);
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [events, setEvents] = useState<EventSummary[]>([]);
   const [selectedCity, setSelectedCity] = useState('');
-  
-  const cities = ['Fortaleza CE', 'Recife PE', 'Salvador BA', 'São Paulo SP'];
-  
-  const filteredEvents = events.filter(event => {
-    return (
-      event.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (selectedCity === '' || event.location === selectedCity)
-    );
-  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedSearch(searchTerm.trim());
+    }, 400);
+
+    return () => clearTimeout(timeout);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setIsLoading(true);
+    setError(null);
+
+    searchEvents(
+      {
+        searchTerm: debouncedSearch || undefined,
+        city: selectedCity || undefined,
+        limit: 30,
+      },
+      controller.signal
+    )
+      .then((response) => {
+        setEvents(response);
+      })
+      .catch((err) => {
+        if (err.name === 'AbortError') return;
+        console.error('Falha ao carregar eventos', err);
+        setError(err instanceof Error ? err.message : 'Não foi possível carregar os eventos.');
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [debouncedSearch, selectedCity]);
+
+  const cities = useMemo(() => {
+    const allCities = events
+      .map((event) => {
+        const locationParts = [event.city, event.state].filter(Boolean);
+        return locationParts.join(' ').trim();
+      })
+      .filter(Boolean);
+    return Array.from(new Set(allCities)).sort((a, b) => a.localeCompare(b));
+  }, [events]);
+
+  const hasEvents = events.length > 0;
+
+  const formatDate = (date?: string | null) => {
+    if (!date) return 'Data a definir';
+    const parsed = new Date(date);
+    if (Number.isNaN(parsed.getTime())) return 'Data a definir';
+    return parsed.toLocaleDateString('pt-BR');
+  };
+
+  const getLocationLabel = (event: EventSummary) => {
+    if (event.city && event.state) return `${event.city} ${event.state}`.trim();
+    return event.city || event.state || 'Local a definir';
+  };
   
   return (
     <div className="min-h-screen flex flex-col pb-16">
@@ -90,13 +111,32 @@ const SearchEvents = () => {
           </div>
         </div>
         
-        {filteredEvents.length > 0 ? (
+        {isLoading && (
+          <div className="text-center py-12 text-gray-500">Carregando eventos...</div>
+        )}
+
+        {error && (
+          <div className="text-center py-12 text-red-500">{error}</div>
+        )}
+
+        {!isLoading && !error && hasEvents ? (
           <div className="grid grid-cols-1 gap-4">
-            {filteredEvents.map(event => (
-              <div key={event.id} className="card card-hover">
+            {events.map(event => (
+              <div
+                key={event.id}
+                className="card card-hover"
+                onClick={() => navigate(`/eventos/${event.slug ?? event.id}`)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    navigate(`/eventos/${event.slug ?? event.id}`);
+                  }
+                }}
+              >
                 <img
-                  src={event.imageUrl}
-                  alt={event.name}
+                  src={event.cover_url || 'https://via.placeholder.com/400x200?text=Evento'}
+                  alt={event.title}
                   className="w-full h-48 object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
@@ -104,10 +144,20 @@ const SearchEvents = () => {
                   }}
                 />
                 <div className="p-4">
-                  <h3 className="font-semibold">{event.name}</h3>
-                  <p className="text-sm text-gray-600 mt-1">{event.location} - {event.date}</p>
-                  <p className="text-xs text-gray-500 mt-1">{event.photographer}</p>
-                  <button className="w-full btn-primary mt-3">Ver fotos</button>
+                  <h3 className="font-semibold">{event.title}</h3>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {getLocationLabel(event)} - {formatDate(event.start_at)}
+                  </p>
+                  <button
+                    type="button"
+                    className="w-full btn-primary mt-3"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/eventos/${event.slug ?? event.id}`);
+                    }}
+                  >
+                    Ver fotos
+                  </button>
                 </div>
               </div>
             ))}
