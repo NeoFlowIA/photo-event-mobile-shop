@@ -243,14 +243,34 @@ export interface CreateEventInput {
   owner_id: string;
   status?: string;
   visibility?: string;
+  slug?: string;
+}
+
+function generateEventSlug(title: string) {
+  const baseSlug = title
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60);
+
+  const uniqueSuffix = Math.random().toString(36).slice(2, 8);
+  const sanitizedBase = baseSlug || 'evento';
+
+  return `${sanitizedBase}-${uniqueSuffix}`;
 }
 
 export async function createEvent(input: CreateEventInput, token: string) {
   try {
+    const slug = input.slug ?? generateEventSlug(input.title);
     const data = await graphqlRequest<{ insert_events_one: EventSummary }>(
       CREATE_EVENT_MUTATION,
       {
-        object: input,
+        object: {
+          ...input,
+          slug,
+        },
       },
       {
         token,
