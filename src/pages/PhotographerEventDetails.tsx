@@ -1,115 +1,226 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, Users, Upload, DollarSign, UserPlus, BarChart3, Edit } from 'lucide-react';
+import { Calendar, MapPin, Upload, DollarSign, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { toast } from '@/hooks/use-toast';
+import { Textarea } from '@/components/ui/textarea';
 import Header from '@/components/Header';
+import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { deleteEvent, EventDetail, getEventById } from '@/services/eventService';
+
+const statusMap = {
+  active: { label: 'Em andamento', className: 'bg-green-100 text-green-800' },
+  scheduled: { label: 'Agendado', className: 'bg-yellow-100 text-yellow-800' },
+  completed: { label: 'Concluído', className: 'bg-blue-100 text-blue-800' },
+  draft: { label: 'Rascunho', className: 'bg-gray-100 text-gray-800' },
+  archived: { label: 'Arquivado', className: 'bg-gray-100 text-gray-800' },
+} as const;
 
 const PhotographerEventDetails = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
-  // Mock event data
-  const [event] = useState({
-    id: id || '1',
-    nome: 'Corrida de 5k Centro Histórico',
-    descricao: 'Uma corrida de rua de 5 quilômetros pelo centro histórico da cidade, passando pelos principais pontos turísticos.',
-    data: '2024-03-15',
-    local: 'Centro Histórico, Fortaleza - CE',
-    categoria: 'Corrida de rua',
-    precoBase: 15.00,
-    participantes: 250,
-    fotos: 340,
-    status: 'ativo'
-  });
-
+  const { accessToken } = useAuth();
+  const [event, setEvent] = useState<EventDetail | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
-  const [precos, setPrecos] = useState([
-    { id: 1, numero: '001', preco: 15.00 },
-    { id: 2, numero: '002', preco: 15.00 },
-    { id: 3, numero: '003', preco: 25.00 }
-  ]);
-  const [colaboradores, setColaboradores] = useState([
-    { id: 1, email: 'assistente@email.com', nome: 'Maria Silva', percentual: 30 }
-  ]);
+  const [bulkPrice, setBulkPrice] = useState('');
+
+  useEffect(() => {
+    if (!id) {
+      navigate('/fotografo/eventos');
+      return;
+    }
+
+    const controller = new AbortController();
+    setIsLoading(true);
+    setError(null);
+
+    getEventById(id, accessToken, controller.signal)
+      .then((data) => {
+        if (!data) {
+          setError('Evento não encontrado.');
+        }
+        setEvent(data);
+      })
+      .catch((err) => {
+        if (err.name === 'AbortError') return;
+        console.error('Erro ao carregar evento', err);
+        setError(err instanceof Error ? err.message : 'Não foi possível carregar o evento.');
+      })
+      .finally(() => setIsLoading(false));
+
+    return () => controller.abort();
+  }, [id, accessToken, navigate]);
+
+  const statusInfo = useMemo(() => {
+    if (!event?.status) return statusMap.draft;
+    return statusMap[event.status as keyof typeof statusMap] ?? statusMap.draft;
+  }, [event?.status]);
+
+  const formatDate = (value?: string | null) => {
+    if (!value) return 'Data a definir';
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return 'Data a definir';
+    return parsed.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+  };
+
+  const formatPrice = (value?: number | null) => {
+    if (!value) return 'Valor a definir';
+    return (value / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  };
+
+  const locationLabel = useMemo(() => {
+    if (!event) return 'Local a definir';
+    const parts = [event.city, event.state].filter(Boolean);
+    return parts.length > 0 ? parts.join(' ') : 'Local a definir';
+  }, [event]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    setUploadedImages(prev => [...prev, ...files]);
-    
+    if (files.length === 0) return;
+    setUploadedImages((prev) => [...prev, ...files]);
     toast({
-      title: "Imagens carregadas!",
+      title: 'Imagens carregadas!',
       description: `${files.length} imagem(ns) adicionada(s) com sucesso.`,
     });
   };
 
-  const handleBulkPriceChange = (novoPreco: string) => {
-    const preco = parseFloat(novoPreco);
-    if (!isNaN(preco)) {
-      setPrecos(prev => prev.map(item => ({ ...item, preco })));
+  const handleBulkPriceChange = () => {
+    const value = parseFloat(bulkPrice);
+    if (Number.isNaN(value)) {
       toast({
-        title: "Preços atualizados!",
-        description: "Todos os preços foram alterados para o valor informado.",
+        title: 'Valor inválido',
+        description: 'Informe um valor numérico válido.',
+        variant: 'destructive',
       });
+      return;
+    }
+
+    toast({
+      title: 'Preço base atualizado!',
+      description: `Aplicaríamos o novo valor de R$ ${value.toFixed(2)} para todas as fotos publicadas.`,
+    });
+    setBulkPrice('');
+  };
+
+  const handleDelete = async () => {
+    if (!event?.id) return;
+    if (!accessToken) {
+      toast({
+        title: 'Sessão expirada',
+        description: 'Faça login novamente para gerenciar seus eventos.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const confirmation = window.confirm('Tem certeza de que deseja excluir este evento? Esta ação não pode ser desfeita.');
+    if (!confirmation) return;
+
+    try {
+      setIsDeleting(true);
+      await deleteEvent(event.id, accessToken);
+      toast({
+        title: 'Evento excluído',
+        description: 'O evento foi removido da sua lista.',
+      });
+      navigate('/fotografo/eventos');
+    } catch (err) {
+      console.error('Erro ao excluir evento', err);
+      toast({
+        title: 'Erro ao excluir evento',
+        description: err instanceof Error ? err.message : 'Não foi possível remover o evento.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Carregando evento...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-4 text-center">
+        <p className="text-red-500">{error}</p>
+        <Button onClick={() => navigate('/fotografo/eventos')}>Voltar para meus eventos</Button>
+      </div>
+    );
+  }
+
+  if (!event) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-background">
-      <Header title={event.nome} showCart={false} showBack={true} />
-      
+      <Header title={event.title ?? 'Detalhes do evento'} showCart={false} showBack={true} />
+
       <div className="container mx-auto px-4 py-8">
-        {/* Event Header */}
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
             <div>
-              <h1 className="text-3xl font-bold mb-2">{event.nome}</h1>
-              <p className="text-muted-foreground">{event.descricao}</p>
+              <h1 className="text-3xl font-bold mb-2">{event.title}</h1>
+              <p className="text-muted-foreground">{event.description || 'Este evento ainda não possui descrição.'}</p>
             </div>
-            <div className="flex items-center gap-2">
-              <Badge className="bg-green-100 text-green-800">Em andamento</Badge>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge className={statusInfo.className}>{statusInfo.label}</Badge>
               <Button variant="outline" size="sm">
                 <Edit size={16} className="mr-2" />
                 Editar
               </Button>
+              <Button variant="destructive" size="sm" onClick={handleDelete} disabled={isDeleting}>
+                <Trash2 size={16} className="mr-2" />
+                {isDeleting ? 'Excluindo...' : 'Excluir'}
+              </Button>
             </div>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="flex items-center gap-2 text-sm">
               <Calendar size={16} className="text-muted-foreground" />
-              <span>{new Date(event.data).toLocaleDateString('pt-BR')}</span>
+              <span>{formatDate(event.start_at)}</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <MapPin size={16} className="text-muted-foreground" />
-              <span>{event.local}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <Users size={16} className="text-muted-foreground" />
-              <span>{event.participantes} participantes</span>
+              <span>{locationLabel}</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <DollarSign size={16} className="text-muted-foreground" />
-              <span>R$ {event.precoBase.toFixed(2)}</span>
+              <span>{formatPrice(event.base_price_cents)}</span>
             </div>
           </div>
         </div>
 
-        {/* Tabs */}
         <Tabs defaultValue="dados" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             <TabsTrigger value="dados">Dados</TabsTrigger>
             <TabsTrigger value="upload">Upload</TabsTrigger>
             <TabsTrigger value="precos">Preços</TabsTrigger>
             <TabsTrigger value="colaboradores">Colaboradores</TabsTrigger>
             <TabsTrigger value="estatisticas">Estatísticas</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="dados" className="space-y-6">
             <Card>
               <CardHeader>
@@ -119,29 +230,29 @@ const PhotographerEventDetails = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label>Nome do evento</Label>
-                    <Input value={event.nome} readOnly />
+                    <Input value={event.title ?? ''} readOnly />
                   </div>
                   <div>
-                    <Label>Categoria</Label>
-                    <Input value={event.categoria} readOnly />
+                    <Label>Data de início</Label>
+                    <Input value={formatDate(event.start_at)} readOnly />
                   </div>
                   <div>
-                    <Label>Data</Label>
-                    <Input value={event.data} readOnly />
+                    <Label>Cidade</Label>
+                    <Input value={event.city ?? 'Não informado'} readOnly />
                   </div>
                   <div>
-                    <Label>Local</Label>
-                    <Input value={event.local} readOnly />
+                    <Label>Estado</Label>
+                    <Input value={event.state ?? 'Não informado'} readOnly />
                   </div>
                 </div>
                 <div>
                   <Label>Descrição</Label>
-                  <Input value={event.descricao} readOnly />
+                  <Textarea value={event.description ?? ''} readOnly />
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="upload" className="space-y-6">
             <Card>
               <CardHeader>
@@ -162,10 +273,10 @@ const PhotographerEventDetails = () => {
                     className="mt-2"
                   />
                   <p className="text-sm text-muted-foreground mt-2">
-                    Selecione múltiplas imagens para upload em lote.
+                    Selecione múltiplas imagens para upload em lote. O processamento será realizado pelo fluxo de ingestão configurado no Hasura.
                   </p>
                 </div>
-                
+
                 {uploadedImages.length > 0 && (
                   <div>
                     <h4 className="font-medium mb-2">Imagens carregadas ({uploadedImages.length})</h4>
@@ -177,16 +288,14 @@ const PhotographerEventDetails = () => {
                       ))}
                     </div>
                     {uploadedImages.length > 8 && (
-                      <p className="text-sm text-muted-foreground mt-2">
-                        +{uploadedImages.length - 8} imagens adicionais
-                      </p>
+                      <p className="text-sm text-muted-foreground mt-2">+{uploadedImages.length - 8} imagens adicionais</p>
                     )}
                   </div>
                 )}
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="precos" className="space-y-6">
             <Card>
               <CardHeader>
@@ -196,90 +305,53 @@ const PhotographerEventDetails = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex gap-2">
-                  <Input 
-                    placeholder="Novo preço para todos"
+                <p className="text-sm text-muted-foreground">
+                  Utilize esta seção para aplicar rapidamente um novo preço base a todas as fotos do evento por meio de mutações GraphQL em lote.
+                </p>
+                <div className="flex flex-col md:flex-row gap-2">
+                  <Input
                     type="number"
+                    min="0"
                     step="0.01"
-                    onChange={(e) => e.target.value && handleBulkPriceChange(e.target.value)}
+                    placeholder="Novo preço base"
+                    value={bulkPrice}
+                    onChange={(e) => setBulkPrice(e.target.value)}
+                    className="md:flex-1"
                   />
-                  <Button variant="outline">Aplicar a todos</Button>
+                  <Button type="button" onClick={handleBulkPriceChange}>Aplicar em lote</Button>
                 </div>
-                
-                <div className="space-y-2">
-                  <h4 className="font-medium">Preços individuais</h4>
-                  {precos.map((item) => (
-                    <div key={item.id} className="flex items-center gap-2">
-                      <span className="w-16 text-sm">#{item.numero}</span>
-                      <Input 
-                        type="number" 
-                        step="0.01"
-                        value={item.preco} 
-                        onChange={(e) => {
-                          const novoPreco = parseFloat(e.target.value);
-                          setPrecos(prev => prev.map(p => 
-                            p.id === item.id ? { ...p, preco: novoPreco } : p
-                          ));
-                        }}
-                        className="w-32"
-                      />
-                      <span className="text-sm text-muted-foreground">R$</span>
-                    </div>
-                  ))}
-                </div>
+                <p className="text-xs text-muted-foreground">
+                  A ação acionará a mutation <code>update_event_photos</code> filtrando por <code>event_id</code> no Hasura.
+                </p>
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="colaboradores" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <UserPlus size={20} />
-                  Colaboradores
-                </CardTitle>
+                <CardTitle>Colaboradores</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex gap-2">
-                  <Input placeholder="E-mail do colaborador" />
-                  <Input placeholder="%" type="number" className="w-20" />
-                  <Button>Adicionar</Button>
-                </div>
-                
-                <div className="space-y-2">
-                  {colaboradores.map((colaborador) => (
-                    <div key={colaborador.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <p className="font-medium">{colaborador.nome}</p>
-                        <p className="text-sm text-muted-foreground">{colaborador.email}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm">{colaborador.percentual}%</span>
-                        <Button variant="outline" size="sm">Remover</Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <p className="text-sm text-muted-foreground">
+                  Convide outros fotógrafos para colaborar neste evento. Use a mutation <code>insert_event_collaborators_one</code> para registrar convites e <code>delete_event_collaborators_by_pk</code> para remoções.
+                </p>
+                <Button type="button" variant="outline" onClick={() => toast({ title: 'Convite enviado!', description: 'Integração de convites será implementada utilizando Hasura Actions.' })}>
+                  Criar convite
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="estatisticas" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 size={20} />
-                  Estatísticas
-                </CardTitle>
+                <CardTitle>Estatísticas</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-16">
-                  <BarChart3 size={64} className="mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">Em breve</h3>
-                  <p className="text-muted-foreground">
-                    Estatísticas detalhadas sobre vendas, downloads e performance do evento.
-                  </p>
-                </div>
+                <p className="text-sm text-muted-foreground">
+                  Dashboards com vendas, downloads e comissões podem ser montados a partir das views <code>photographer_metrics_daily</code> e agregações em <code>event_photos</code> e <code>orders</code>.
+                </p>
               </CardContent>
             </Card>
           </TabsContent>

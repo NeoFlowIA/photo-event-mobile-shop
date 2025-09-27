@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,34 +8,73 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import Header from '@/components/Header';
+import { useAuth } from '@/contexts/AuthContext';
+import { createEvent, listEventCategories, type EventCategory } from '@/services/eventService';
 
 const PhotographerEventCreate = () => {
   const navigate = useNavigate();
+  const { user, accessToken } = useAuth();
   const [eventForm, setEventForm] = useState({
     nome: '',
     descricao: '',
     data: '',
     local: '',
     categoria: '',
-    precoBase: ''
+    precoBase: '',
+    capa: '',
   });
+  const [categories, setCategories] = useState<EventCategory[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const categories = [
-    'Corrida de rua',
-    'Triathlon',
-    'Ciclismo',
-    'Maratona',
-    'Natação',
-    'Show',
-    'Festival',
-    'Evento corporativo',
-    'Outro'
-  ];
+  useEffect(() => {
+    if (!accessToken) {
+      setCategories([]);
+      setIsLoadingCategories(false);
+      return;
+    }
 
-  const handleSubmit = (e: React.FormEvent) => {
+    const abortController = new AbortController();
+    setIsLoadingCategories(true);
+
+    listEventCategories(accessToken, abortController.signal)
+      .then((fetched) => {
+        setCategories(fetched);
+      })
+      .catch((error) => {
+        if (abortController.signal.aborted) return;
+        console.error('Erro ao carregar categorias', error);
+        toast({
+          title: 'Não foi possível carregar as categorias',
+          description: 'Tente novamente mais tarde.',
+          variant: 'destructive',
+        });
+      })
+      .finally(() => {
+        if (!abortController.signal.aborted) {
+          setIsLoadingCategories(false);
+        }
+      });
+
+    return () => {
+      abortController.abort();
+    };
+  }, [accessToken]);
+
+  useEffect(() => {
+    if (!eventForm.categoria) return;
+    const exists = categories.some((category) => category.id === eventForm.categoria);
+    if (!exists) {
+      setEventForm((prev) => ({ ...prev, categoria: '' }));
+    }
+  }, [categories, eventForm.categoria]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!eventForm.nome || !eventForm.data || !eventForm.local || !eventForm.categoria) {
+
+    const coverUrl = eventForm.capa.trim();
+
+    if (!eventForm.nome || !eventForm.data || !eventForm.local || !eventForm.categoria || !coverUrl) {
       toast({
         title: "Campos obrigatórios",
         description: "Por favor, preencha todos os campos obrigatórios.",
@@ -44,16 +83,65 @@ const PhotographerEventCreate = () => {
       return;
     }
 
-    // Mock creation - generate random ID
-    const eventId = Math.random().toString(36).substr(2, 9);
-    
-    toast({
-      title: "Evento criado (mock)!",
-      description: `O evento "${eventForm.nome}" foi criado com sucesso.`,
-    });
-    
-    // Redirect to event details
-    navigate(`/fotografo/eventos/${eventId}`);
+    if (!user?.id || !accessToken) {
+      toast({
+        title: 'Sessão expirada',
+        description: 'Faça login novamente para criar um evento.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const parseLocation = (value: string) => {
+      if (!value) return { city: null, state: null };
+      const sanitized = value.replace(/,/g, '-');
+      const [cityPart, statePart] = sanitized.split('-').map((part) => part.trim());
+      return {
+        city: cityPart || null,
+        state: statePart || null,
+      };
+    };
+
+    try {
+      setIsSubmitting(true);
+      const { city, state } = parseLocation(eventForm.local);
+      const startAt = new Date(`${eventForm.data}T00:00:00`);
+      const basePriceCents = eventForm.precoBase ? Math.round(parseFloat(eventForm.precoBase) * 100) : null;
+
+      const created = await createEvent(
+        {
+          title: eventForm.nome,
+          description: eventForm.descricao || null,
+          start_at: Number.isNaN(startAt.getTime()) ? new Date().toISOString() : startAt.toISOString(),
+          city,
+          state,
+          venue_name: city,
+          base_price_cents: basePriceCents,
+          owner_id: user.id,
+          status: 'draft',
+          visibility: 'public',
+          category_id: eventForm.categoria,
+          cover_url: coverUrl,
+        },
+        accessToken
+      );
+
+      toast({
+        title: 'Evento criado!',
+        description: `O evento "${created.title}" foi criado com sucesso.`,
+      });
+
+      navigate(`/fotografo/eventos/${created.id}`);
+    } catch (error) {
+      console.error('Erro ao criar evento', error);
+      toast({
+        title: 'Erro ao criar evento',
+        description: error instanceof Error ? error.message : 'Não foi possível criar o evento.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -104,16 +192,37 @@ const PhotographerEventCreate = () => {
                 <div>
                   <Label htmlFor="categoria">Categoria *</Label>
                   <Select value={eventForm.categoria} onValueChange={(value) => setEventForm(prev => ({ ...prev, categoria: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione a categoria" />
+                    <SelectTrigger disabled={isLoadingCategories || categories.length === 0}>
+                      <SelectValue placeholder={isLoadingCategories ? 'Carregando categorias...' : 'Selecione a categoria'} />
                     </SelectTrigger>
                     <SelectContent>
-                      {categories.map(category => (
-                        <SelectItem key={category} value={category}>{category}</SelectItem>
+                      {categories.map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                  {!isLoadingCategories && categories.length === 0 && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Nenhuma categoria disponível no momento.
+                    </p>
+                  )}
                 </div>
+              </div>
+
+              <div>
+                <Label htmlFor="capa">Imagem de capa *</Label>
+                <Input
+                  id="capa"
+                  value={eventForm.capa}
+                  onChange={(e) => setEventForm(prev => ({ ...prev, capa: e.target.value }))}
+                  placeholder="Cole o link da imagem de destaque do evento"
+                  required
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Use uma URL de imagem pública que represente o evento.
+                </p>
               </div>
 
               <div>
@@ -141,12 +250,20 @@ const PhotographerEventCreate = () => {
               </div>
 
               <div className="flex gap-4 pt-4">
-                <Button type="submit" className="flex-1">
-                  Criar Evento
+                <Button
+                  type="submit"
+                  className="flex-1"
+                  disabled={
+                    isSubmitting ||
+                    isLoadingCategories ||
+                    categories.length === 0
+                  }
+                >
+                  {isSubmitting ? 'Criando...' : 'Criar Evento'}
                 </Button>
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => navigate('/fotografo/eventos')}
                   className="flex-1"
                 >

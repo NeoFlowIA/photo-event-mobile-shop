@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { MapPin, Calendar, Building2, Search, Share2, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,17 +9,19 @@ import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbS
 import Header from '@/components/Header';
 import Navbar from '@/components/Navbar';
 import PhotoGallery from '@/components/PhotoGallery';
-import { getEventBySlug, getEventById, getRelatedEvents, EventDetail } from '@/data/eventsMock';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/contexts/AuthContext';
 import CpfModal from '@/components/CpfModal';
 import { toast } from '@/components/ui/use-toast';
+import { EventDetail as HasuraEventDetail, EventSummary, getEventById, getEventBySlug, searchEvents } from '@/services/eventService';
 
 const EventDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const [event, setEvent] = useState<EventDetail | null>(null);
+  const [event, setEvent] = useState<HasuraEventDetail | null>(null);
+  const [relatedEvents, setRelatedEvents] = useState<EventSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showCpfModal, setShowCpfModal] = useState(false);
   const { count } = useCart();
@@ -31,40 +33,85 @@ const EventDetailPage = () => {
       return;
     }
 
-    // Try to get event by slug first, then by ID (for backward compatibility)
-    let foundEvent = getEventBySlug(slug);
-    if (!foundEvent) {
-      foundEvent = getEventById(slug);
-    }
+    const controller = new AbortController();
+    let isMounted = true;
 
-    if (foundEvent) {
-      setEvent(foundEvent);
-      // Update page title and meta
-      document.title = `${foundEvent.title} — ${foundEvent.city} — ${formatDate(foundEvent.date)}`;
-    } else {
-      navigate('/404');
-    }
-    setLoading(false);
+    const fetchEvent = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        let fetched = await getEventBySlug(slug, undefined, controller.signal);
+        if (!fetched) {
+          fetched = await getEventById(slug, undefined, controller.signal);
+        }
+
+        if (!fetched) {
+          if (isMounted) {
+            setError('Evento não encontrado.');
+            setEvent(null);
+          }
+          return;
+        }
+
+        if (isMounted) {
+          setEvent(fetched);
+          document.title = `${fetched.title ?? 'Evento'} — ${fetched.city ?? ''}`;
+        }
+
+        const related = await searchEvents({ city: fetched.city ?? undefined, limit: 4 }, controller.signal);
+        if (isMounted) {
+          setRelatedEvents(related.filter((item) => item.id !== fetched.id));
+        }
+      } catch (err) {
+        if ((err as Error).name === 'AbortError') return;
+        console.error('Erro ao carregar evento', err);
+        if (isMounted) {
+          setError('Não foi possível carregar o evento no momento.');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchEvent();
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
   }, [slug, navigate]);
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString?: string | null) => {
+    if (!dateString) return 'Data a definir';
     const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return 'Data a definir';
     return date.toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
-      year: 'numeric'
+      year: 'numeric',
     });
   };
 
-  const formatDateLong = (dateString: string) => {
+  const formatDateLong = (dateString?: string | null) => {
+    if (!dateString) return 'Data a definir';
     const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return 'Data a definir';
     return date.toLocaleDateString('pt-BR', {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
-      year: 'numeric'
+      year: 'numeric',
     });
   };
+
+  const locationLabel = useMemo(() => {
+    if (!event) return 'Local a definir';
+    const parts = [event.city, event.state].filter(Boolean);
+    return parts.length > 0 ? parts.join(' ') : 'Local a definir';
+  }, [event]);
 
   const handleShare = async () => {
     const shareData = {
@@ -76,19 +123,18 @@ const EventDetailPage = () => {
     if (navigator.share) {
       try {
         await navigator.share(shareData);
-      } catch (error) {
-        // User cancelled sharing
+      } catch (shareError) {
+        console.warn('Compartilhamento cancelado', shareError);
       }
     } else {
-      // Fallback: copy to clipboard
       try {
         await navigator.clipboard.writeText(window.location.href);
         toast({
-          title: "Link copiado!",
-          description: "O link do evento foi copiado para sua área de transferência.",
+          title: 'Link copiado!',
+          description: 'O link do evento foi copiado para sua área de transferência.',
         });
-      } catch (error) {
-        console.error('Failed to copy link:', error);
+      } catch (clipboardError) {
+        console.error('Erro ao copiar link:', clipboardError);
       }
     }
   };
@@ -97,18 +143,17 @@ const EventDetailPage = () => {
     if (!user?.cpf) {
       setShowCpfModal(true);
     } else {
-      // Open selfie match dialog (would implement the actual selfie matching component)
       toast({
-        title: "Funcionalidade em desenvolvimento",
-        description: "O match por selfie estará disponível em breve!",
+        title: 'Funcionalidade em desenvolvimento',
+        description: 'O match por selfie estará disponível em breve!',
       });
     }
   };
 
   const handleContactPhotographer = () => {
     toast({
-      title: "Contato com fotógrafo",
-      description: "Funcionalidade de contato será implementada em breve!",
+      title: 'Contato com fotógrafo',
+      description: 'Funcionalidade de contato será implementada em breve!',
     });
   };
 
@@ -123,20 +168,21 @@ const EventDetailPage = () => {
     );
   }
 
-  if (!event) {
-    return null; // Will redirect to 404
+  if (error || !event) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 text-center px-4">
+        <p className="text-red-500">{error ?? 'Evento não encontrado.'}</p>
+        <Button onClick={() => navigate('/buscar-eventos')}>Voltar para busca</Button>
+      </div>
+    );
   }
-
-  const relatedEvents = getRelatedEvents(event.id);
 
   return (
     <div className="min-h-screen flex flex-col pb-16">
       <Header />
-      
-      {/* Hero Section */}
+
       <div className="bg-gradient-to-b from-gray-50 to-white border-b">
         <div className="container mx-auto px-4 py-6">
-          {/* Breadcrumb */}
           <Breadcrumb className="mb-4">
             <BreadcrumbList>
               <BreadcrumbItem>
@@ -144,49 +190,44 @@ const EventDetailPage = () => {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink href="/eventos">Eventos</BreadcrumbLink>
+                <BreadcrumbLink href="/buscar-eventos">Eventos</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbPage>{event.title}</BreadcrumbPage>
             </BreadcrumbList>
           </Breadcrumb>
 
-          {/* Event Header */}
           <div className="flex flex-col lg:flex-row lg:items-start gap-6">
             <div className="flex-1">
-              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-                {event.title}
-              </h1>
-              
+              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">{event.title}</h1>
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="flex items-center gap-2 text-gray-600">
                   <MapPin size={20} className="text-primary" />
-                  <span>{event.city}</span>
+                  <span>{locationLabel}</span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600">
                   <Calendar size={20} className="text-primary" />
-                  <span>{formatDateLong(event.date)}</span>
+                  <span>{formatDateLong(event.start_at)}</span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600">
                   <Building2 size={20} className="text-primary" />
-                  <span>{event.venue}</span>
+                  <span>{event.venue_name ?? 'Local a definir'}</span>
                 </div>
               </div>
 
-              {/* Photographer Info */}
               <div className="flex items-center gap-3 mb-6">
                 <Avatar className="w-12 h-12">
-                  <AvatarImage src={event.author.avatar} alt={event.author.name} />
-                  <AvatarFallback>{event.author.name.charAt(0)}</AvatarFallback>
+                  <AvatarImage src={event.cover_url ?? ''} alt={event.title ?? ''} />
+                  <AvatarFallback>{event.title?.charAt(0) ?? '?'}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="font-medium text-gray-900">{event.author.name}</p>
-                  <p className="text-sm text-gray-600">{event.author.handle}</p>
+                  <p className="font-medium text-gray-900">{event.owner_id ? 'Fotógrafo responsável' : 'Evento público'}</p>
+                  <p className="text-sm text-gray-600">ID do organizador: {event.owner_id ?? 'N/A'}</p>
                 </div>
               </div>
             </div>
 
-            {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row lg:flex-col gap-2 lg:w-48">
               <Button onClick={handleShare} variant="outline" className="flex-1">
                 <Share2 size={16} className="mr-2" />
@@ -201,157 +242,137 @@ const EventDetailPage = () => {
         </div>
       </div>
 
-      <main className="flex-1 container mx-auto px-4 py-8">
-        {/* Search and Actions Bar */}
-        <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-xl p-4 mb-8 shadow-sm">
-          <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center">
-            <div className="flex-1">
-              <div className="relative">
-                <Search size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <Input
-                  placeholder="Buscar por número, CPF ou palavra-chave"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <Button onClick={handleSelfieMatch} variant="outline">
-                Encontrei minha foto?
-              </Button>
-              {count > 0 && (
-                <Button asChild>
-                  <Link to="/carrinho">
-                    Ver carrinho ({count})
-                  </Link>
+      <main className="flex-1 container mx-auto px-4 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-6">
+            <section>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                <div>
+                  <h2 className="text-2xl font-semibold text-gray-900">Galeria de fotos</h2>
+                  <p className="text-gray-600">As fotos serão disponibilizadas assim que os fotógrafos finalizarem o upload.</p>
+                </div>
+                <Button onClick={handleSelfieMatch} className="flex items-center gap-2">
+                  <Search size={18} />
+                  Buscar por selfie ou número
                 </Button>
-              )}
-            </div>
-          </div>
-        </div>
+              </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Photo Gallery */}
-          <div className="lg:col-span-3">
-            <PhotoGallery
-              photos={event.photos}
-              eventId={event.id}
-              eventTitle={event.title}
-            />
+              <PhotoGallery photos={[]} eventId={event.id} eventTitle={event.title ?? ''} />
+            </section>
+
+            <section>
+              <h2 className="text-xl font-semibold mb-3">Sobre o evento</h2>
+              <Card>
+                <CardContent className="p-6 space-y-4">
+                  <p className="text-gray-700 whitespace-pre-line">
+                    {event.description || 'O organizador ainda não adicionou uma descrição detalhada para este evento.'}
+                  </p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <span className="font-medium text-gray-900 block mb-1">Data</span>
+                      <span>{formatDate(event.start_at)}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-900 block mb-1">Local</span>
+                      <span>{event.venue_name ?? locationLabel}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-900 block mb-1">Cidade</span>
+                      <span>{event.city ?? 'A definir'}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-900 block mb-1">Estado</span>
+                      <span>{event.state ?? 'A definir'}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
           </div>
 
-          {/* Event Info Sidebar */}
-          <div className="lg:col-span-1">
-            <Card className="sticky top-32">
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-lg mb-4">Informações do evento</h3>
-                
-                <div className="space-y-4 text-sm">
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-1">Data e horário</h4>
-                    <p className="text-gray-600">{formatDateLong(event.date)}</p>
-                    <p className="text-gray-600">{event.time}</p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-1">Local</h4>
-                    <p className="text-gray-600">{event.venue}</p>
-                    <p className="text-gray-600">{event.city}</p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-1">Categoria</h4>
-                    <p className="text-gray-600">{event.category}</p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-1">Resolução</h4>
-                    <p className="text-gray-600">{event.resolution}</p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-1">Política de uso</h4>
-                    <p className="text-gray-600">{event.policy}</p>
-                  </div>
+          <aside className="space-y-6">
+            <Card>
+              <CardContent className="p-6 space-y-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Buscar fotos</h3>
+                  <p className="text-sm text-gray-600">Encontre suas fotos rapidamente utilizando o número do peito ou selfie.</p>
+                </div>
+
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    toast({
+                      title: 'Busca em desenvolvimento',
+                      description: 'A busca por número será integrada ao Hasura em breve.',
+                    });
+                  }}
+                  className="space-y-3"
+                >
+                  <Input
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Digite o número do participante"
+                  />
+                  <Button type="submit" className="w-full flex items-center justify-center gap-2">
+                    <Search size={16} />
+                    Buscar fotos
+                  </Button>
+                </form>
+
+                <div className="pt-4 border-t border-gray-200">
+                  <p className="text-sm text-gray-500">
+                    Assim que as fotos estiverem disponíveis você poderá adicioná-las ao carrinho e finalizar a compra em poucos cliques.
+                  </p>
                 </div>
               </CardContent>
             </Card>
-          </div>
-        </div>
 
-        {/* Related Events */}
-        {relatedEvents.length > 0 && (
-          <section className="mt-16">
-            <h2 className="text-2xl font-bold text-gray-900 mb-8">Eventos relacionados</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {relatedEvents.map((relatedEvent) => (
-                <Card key={relatedEvent.id} className="group hover:shadow-lg transition-all duration-300 overflow-hidden">
-                  <Link to={`/eventos/${relatedEvent.slug}`}>
-                    <div className="h-48 relative overflow-hidden">
-                      <img
-                        src={relatedEvent.cover}
-                        alt={relatedEvent.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                    <CardContent className="p-4">
-                      <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-primary transition-colors">
-                        {relatedEvent.title}
-                      </h3>
-                      <div className="space-y-1 text-sm text-gray-600">
-                        <div className="flex items-center gap-2">
-                          <MapPin size={14} />
-                          <span>{relatedEvent.city}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Calendar size={14} />
-                          <span>{formatDate(relatedEvent.date)}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Link>
-                </Card>
-              ))}
-            </div>
-          </section>
-        )}
+            <Card>
+              <CardContent className="p-6 space-y-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Outros eventos</h3>
+                  <p className="text-sm text-gray-600">Confira eventos próximos ou realizados na mesma região.</p>
+                </div>
+
+                <div className="space-y-3">
+                  {relatedEvents.slice(0, 4).map((related) => (
+                    <Link
+                      key={related.id}
+                      to={`/eventos/${related.slug ?? related.id}`}
+                      className="block p-3 rounded-lg border border-gray-200 hover:border-primary transition"
+                    >
+                      <p className="font-medium text-gray-900">{related.title}</p>
+                      <p className="text-xs text-gray-500">{[related.city, related.state].filter(Boolean).join(' ')}</p>
+                      <p className="text-xs text-gray-500">{formatDate(related.start_at)}</p>
+                    </Link>
+                  ))}
+
+                  {relatedEvents.length === 0 && (
+                    <p className="text-sm text-gray-500">Nenhum outro evento encontrado nesta região.</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6 space-y-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Carrinho</h3>
+                  <p className="text-sm text-gray-600">Você possui {count} item{count === 1 ? '' : 's'} no carrinho.</p>
+                </div>
+                <Button onClick={() => navigate('/carrinho')} className="w-full">
+                  Ir para o carrinho
+                </Button>
+              </CardContent>
+            </Card>
+          </aside>
+        </div>
       </main>
 
       <Navbar />
 
-      {/* CPF Modal */}
-      <CpfModal
-        open={showCpfModal}
-        onClose={() => setShowCpfModal(false)}
-        onConfirm={() => {
-          setShowCpfModal(false);
-          handleSelfieMatch();
-        }}
-      />
-
-      {/* JSON-LD Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Event",
-            "name": event.title,
-            "startDate": event.date,
-            "location": {
-              "@type": "Place",
-              "name": event.venue,
-              "address": event.city
-            },
-            "organizer": {
-              "@type": "Person",
-              "name": event.author.name
-            },
-            "description": event.description
-          })
-        }}
-      />
+      <CpfModal open={showCpfModal} onOpenChange={setShowCpfModal} />
     </div>
   );
 };
