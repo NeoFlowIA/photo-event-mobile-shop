@@ -60,6 +60,23 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## Environment configuration
+
+The screens that consult or gerenciam eventos depend on a Hasura instance. Configure the following environment variables before running the app locally:
+
+```sh
+cp .env.example .env
+```
+
+Edit `.env` and provide your credentials:
+
+```dotenv
+VITE_HASURA_GRAPHQL_URL=https://whatsapp-hasura.t2wird.easypanel.host/v1/graphql
+VITE_HASURA_ADMIN_SECRET=mysecretkey # substitua pelo segredo correto em produção
+```
+
+The admin secret is required to listar eventos públicos (busca) enquanto o token JWT (obtido via backend de autenticação) será encaminhado automaticamente para operações autenticadas como criar, listar e remover eventos do fotógrafo.
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/3412fe1e-9430-4a93-9ee1-ba28dca3541f) and click on Share -> Publish.
