@@ -34,7 +34,7 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-2xl bg-gradient-to-r from-primary/15 via-primary/5 to-transparent px-6 py-6 shadow-sm">
+      <section className="rounded-3xl border border-primary/20 bg-gradient-to-r from-primary/15 via-primary/5 to-transparent px-6 py-6 shadow-sm">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-sm text-primary">Olá, {user?.displayName ?? 'admin'} 👋</p>
@@ -66,7 +66,7 @@ const Dashboard = () => {
             const isPositive = metric.trend === 'up';
             const Icon = isPositive ? ArrowUpRight : ArrowDownRight;
             return (
-              <Card key={metric.id} className="border-transparent bg-white shadow-sm">
+              <Card key={metric.id} className="border border-slate-200/70 bg-white/80 shadow-sm">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-slate-500">{metric.title}</CardTitle>
                   <span className={`flex h-9 w-9 items-center justify-center rounded-full ${
@@ -96,7 +96,7 @@ const Dashboard = () => {
       </section>
 
       <section className="grid gap-6 lg:grid-cols-2">
-        <Card className="border-transparent bg-white shadow-sm">
+        <Card className="border border-slate-200/70 bg-white/80 shadow-sm">
           <CardHeader>
             <CardTitle className="text-base font-semibold text-slate-800">Performance financeira</CardTitle>
             <p className="text-sm text-slate-500">Faturamento bruto, líquido e volume de repasses nos últimos meses.</p>
@@ -123,7 +123,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="border-transparent bg-white shadow-sm">
+        <Card className="border border-slate-200/70 bg-white/80 shadow-sm">
           <CardHeader>
             <CardTitle className="text-base font-semibold text-slate-800">Uploads e aprovações diárias</CardTitle>
             <p className="text-sm text-slate-500">Monitoramento da capacidade de processamento e matching via IA.</p>
@@ -154,7 +154,7 @@ const Dashboard = () => {
       </section>
 
       <section className="grid gap-6 xl:grid-cols-2">
-        <Card className="border-transparent bg-white shadow-sm">
+        <Card className="border border-slate-200/70 bg-white/80 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle className="text-base font-semibold text-slate-800">Fila de aprovação</CardTitle>
@@ -200,7 +200,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="border-transparent bg-white shadow-sm">
+        <Card className="border border-slate-200/70 bg-white/80 shadow-sm">
           <CardHeader className="flex flex-row items-center gap-4">
             <div>
               <CardTitle className="text-base font-semibold text-slate-800">Pagamentos a fotógrafos</CardTitle>

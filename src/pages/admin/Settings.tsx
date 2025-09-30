@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 
 const Settings = () => {
   const [systemParams, setSystemParams] = useState(adminSystemParameters);
@@ -61,17 +62,69 @@ const Settings = () => {
     setIntegrationConfig(adminIntegrationConfig);
   };
 
+  const enabledFeatures = useMemo(
+    () => [systemParams.instantDeliveryEnabled, systemParams.aiMatchingEnabled].filter(Boolean).length,
+    [systemParams],
+  );
+  const categoriesCount = useMemo(() => categories.length, [categories]);
+  const autoPoliciesEnabled = useMemo(
+    () => [financialPolicies.instantPayoutEnabled, financialPolicies.auditQueueEnabled].filter(Boolean).length,
+    [financialPolicies],
+  );
+  const integrationStatus = useMemo(
+    () =>
+      Object.values(integrationConfig).every((value) =>
+        typeof value === 'string' ? value.trim().length > 0 : Boolean(value),
+      ),
+    [integrationConfig],
+  );
+
   return (
     <div className="space-y-6">
-      <Card className="border-transparent bg-white shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-slate-900">Configurações do sistema</CardTitle>
-          <p className="text-sm text-slate-500">
-            Parâmetros gerais, categorias de eventos, taxas e integrações com Hasura e provedores externos.
-          </p>
-        </CardHeader>
-        <CardContent className="grid gap-6 lg:grid-cols-2">
-          <Card className="border border-slate-200 shadow-none">
+      <AdminPageHeader
+        eyebrow="Configuração"
+        title="Configurações do sistema"
+        description="Parâmetros gerais, categorias de eventos, taxas e integrações com Hasura e provedores externos."
+        actions={
+          <div className="flex flex-col gap-3 rounded-2xl border border-slate-200/80 bg-white/70 p-4 text-xs text-slate-500">
+            <p className="font-semibold text-slate-600">Alterações em andamento</p>
+            <p className="leading-relaxed">
+              {isDirty
+                ? 'Há modificações não salvas. Salve para sincronizar com o backend e Hasura.'
+                : 'Nenhuma alteração pendente. As configurações estão sincronizadas.'}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="ghost" size="sm" onClick={resetAll} disabled={!isDirty}>
+                Descartar
+              </Button>
+              <Button size="sm" onClick={handleSave} disabled={!isDirty}>
+                Salvar mudanças
+              </Button>
+            </div>
+          </div>
+        }
+      >
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Recursos ativos</p>
+          <p className="mt-1 text-lg font-semibold text-slate-900">{enabledFeatures}/2</p>
+        </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Categorias disponíveis</p>
+          <p className="mt-1 text-lg font-semibold text-primary">{categoriesCount}</p>
+        </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Políticas automáticas</p>
+          <p className="mt-1 text-lg font-semibold text-emerald-600">{autoPoliciesEnabled}/2</p>
+        </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Integrações prontas</p>
+          <p className="mt-1 text-lg font-semibold text-slate-900">{integrationStatus ? 'Completas' : 'Revisar'}</p>
+        </div>
+      </AdminPageHeader>
+
+      <Card className="border border-slate-200/80 bg-white/80 shadow-sm">
+        <CardContent className="grid gap-6 p-6 lg:grid-cols-2">
+          <Card className="border border-slate-200/70 bg-white/70 shadow-none">
             <CardHeader>
               <CardTitle className="text-base font-semibold text-slate-800">Parâmetros gerais</CardTitle>
               <p className="text-sm text-slate-500">Identidade da plataforma e políticas operacionais padrão.</p>
@@ -169,7 +222,7 @@ const Settings = () => {
             </CardContent>
           </Card>
 
-          <Card className="border border-slate-200 shadow-none">
+          <Card className="border border-slate-200/70 bg-white/70 shadow-none">
             <CardHeader>
               <CardTitle className="text-base font-semibold text-slate-800">Comissões e taxas</CardTitle>
               <p className="text-sm text-slate-500">Controle da precificação, limites e políticas de payout.</p>
@@ -251,7 +304,7 @@ const Settings = () => {
                   />
                 </div>
               </div>
-              <div className="space-y-2 rounded-lg border border-slate-200 p-3">
+              <div className="space-y-2 rounded-xl border border-slate-200/80 bg-white/60 p-3">
                 <label className="text-xs font-semibold uppercase text-slate-500">Políticas automáticas</label>
                 <div className="flex items-center justify-between text-sm">
                   <span>Payout instantâneo habilitado</span>
@@ -285,7 +338,7 @@ const Settings = () => {
         </CardContent>
       </Card>
 
-      <Card className="border-transparent bg-white shadow-sm">
+      <Card className="border border-slate-200/80 bg-white/80 shadow-sm">
         <CardHeader className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div>
             <CardTitle className="text-base font-semibold text-slate-800">Categorias de eventos</CardTitle>
@@ -299,7 +352,7 @@ const Settings = () => {
         </CardHeader>
         <CardContent className="space-y-3">
           {categories.map((category) => (
-            <div key={category.id} className="rounded-xl border border-slate-200 p-4 text-sm text-slate-600">
+            <div key={category.id} className="rounded-xl border border-slate-200/80 bg-white/60 p-4 text-sm text-slate-600">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <Input
@@ -331,7 +384,7 @@ const Settings = () => {
         </CardContent>
       </Card>
 
-      <Card className="border-transparent bg-white shadow-sm">
+      <Card className="border border-slate-200/80 bg-white/80 shadow-sm">
         <CardHeader>
           <CardTitle className="text-base font-semibold text-slate-800">Integrações</CardTitle>
           <p className="text-sm text-slate-500">
@@ -388,8 +441,8 @@ const Settings = () => {
             />
           </div>
         </CardContent>
-        <CardFooter className="flex items-center justify-between border-t border-slate-100 bg-slate-50 py-4">
-          <div className="text-xs text-slate-500">
+        <CardFooter className="flex items-center justify-between gap-4 border-t border-slate-100 bg-slate-50/80 px-6 py-4 text-xs text-slate-500">
+          <div>
             Última sincronização com Hasura há 2h. Alterações serão aplicadas via mutation protegida.
           </div>
           <div className="flex gap-2">
