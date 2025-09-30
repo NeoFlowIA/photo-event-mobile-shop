@@ -133,7 +133,7 @@ const App = () => (
               <PhotographerCollaborations />
             </PhotographerRoute>
           } />
-          <Route path="/admin" element={
+          <Route path="/admin/*" element={
             <AdminRoute>
               <AdminDashboard />
             </AdminRoute>

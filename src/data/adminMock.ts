@@ -252,3 +252,389 @@ export const adminOperationalAlerts: OperationalAlert[] = [
     createdAt: '2024-06-16T23:45:00-03:00',
   },
 ];
+
+export type AdminUserStatus = 'active' | 'suspended' | 'invited';
+
+export interface AdminUserRecord {
+  id: string;
+  name: string;
+  email: string;
+  role: 'cliente' | 'fotografo' | 'admin';
+  plan: 'gratuito' | 'pro' | 'enterprise';
+  status: AdminUserStatus;
+  phone: string;
+  location: string;
+  createdAt: string;
+  lastActiveAt: string;
+  totalSpendCents: number;
+  totalUploads: number;
+  flagged: boolean;
+  tags: string[];
+  documentsVerified: boolean;
+}
+
+export const adminUsers: AdminUserRecord[] = [
+  {
+    id: 'usr-1001',
+    name: 'Camila Nogueira',
+    email: 'camila.nogueira@email.com',
+    role: 'cliente',
+    plan: 'pro',
+    status: 'active',
+    phone: '+55 11 98888-1212',
+    location: 'São Paulo • SP',
+    createdAt: '2023-02-11T18:32:00-03:00',
+    lastActiveAt: '2024-06-17T20:41:00-03:00',
+    totalSpendCents: 128900,
+    totalUploads: 0,
+    flagged: false,
+    tags: ['alto engajamento', 'assinante'],
+    documentsVerified: true,
+  },
+  {
+    id: 'usr-1002',
+    name: 'Bruno Alves',
+    email: 'bruno.alves@flashrun.com',
+    role: 'fotografo',
+    plan: 'enterprise',
+    status: 'active',
+    phone: '+55 21 99921-3344',
+    location: 'Rio de Janeiro • RJ',
+    createdAt: '2022-11-03T09:20:00-03:00',
+    lastActiveAt: '2024-06-17T19:05:00-03:00',
+    totalSpendCents: 0,
+    totalUploads: 128400,
+    flagged: false,
+    tags: ['top seller', 'kpi acima'],
+    documentsVerified: true,
+  },
+  {
+    id: 'usr-1003',
+    name: 'Larissa Campos',
+    email: 'larissa.campos@studiohorizonte.com',
+    role: 'fotografo',
+    plan: 'pro',
+    status: 'suspended',
+    phone: '+55 31 98777-9876',
+    location: 'Belo Horizonte • MG',
+    createdAt: '2023-06-25T13:10:00-03:00',
+    lastActiveAt: '2024-06-16T22:40:00-03:00',
+    totalSpendCents: 0,
+    totalUploads: 45210,
+    flagged: true,
+    tags: ['pendência fiscal'],
+    documentsVerified: false,
+  },
+  {
+    id: 'usr-1004',
+    name: 'Felipe Duarte',
+    email: 'felipe.duarte@email.com',
+    role: 'cliente',
+    plan: 'gratuito',
+    status: 'invited',
+    phone: '+55 41 98812-4545',
+    location: 'Curitiba • PR',
+    createdAt: '2024-01-18T07:52:00-03:00',
+    lastActiveAt: '2024-06-15T17:10:00-03:00',
+    totalSpendCents: 32900,
+    totalUploads: 0,
+    flagged: false,
+    tags: ['potencial upgrade'],
+    documentsVerified: true,
+  },
+  {
+    id: 'usr-1005',
+    name: 'Equipe EventosRun',
+    email: 'contato@eventosrun.com.br',
+    role: 'admin',
+    plan: 'enterprise',
+    status: 'active',
+    phone: '+55 48 99551-2020',
+    location: 'Florianópolis • SC',
+    createdAt: '2022-07-01T08:00:00-03:00',
+    lastActiveAt: '2024-06-17T11:15:00-03:00',
+    totalSpendCents: 0,
+    totalUploads: 0,
+    flagged: false,
+    tags: ['suporte regional'],
+    documentsVerified: true,
+  },
+];
+
+export type AdminEventLifecycle = 'draft' | 'pending' | 'published' | 'running' | 'archived';
+
+export interface AdminManagedEvent {
+  id: string;
+  title: string;
+  category: string;
+  status: AdminEventLifecycle;
+  startAt: string;
+  endAt: string;
+  location: string;
+  photographer: string;
+  conversionRate: number;
+  totalPhotos: number;
+  soldPhotos: number;
+  revenueCents: number;
+  platformFeePercent: number;
+  aiReviewStatus: 'pending' | 'completed' | 'blocked';
+  flagged: boolean;
+}
+
+export const adminManagedEvents: AdminManagedEvent[] = [
+  {
+    id: 'evt-9500',
+    title: 'Meia Maratona Rio Sunrise',
+    category: 'Corrida de rua',
+    status: 'running',
+    startAt: '2024-06-16T05:30:00-03:00',
+    endAt: '2024-06-16T12:00:00-03:00',
+    location: 'Rio de Janeiro • RJ',
+    photographer: 'Bruno Alves',
+    conversionRate: 0.42,
+    totalPhotos: 18650,
+    soldPhotos: 7820,
+    revenueCents: 542800,
+    platformFeePercent: 20,
+    aiReviewStatus: 'completed',
+    flagged: false,
+  },
+  {
+    id: 'evt-9512',
+    title: 'Gran Fondo Serra do Mar',
+    category: 'Ciclismo',
+    status: 'published',
+    startAt: '2024-06-22T07:00:00-03:00',
+    endAt: '2024-06-22T17:00:00-03:00',
+    location: 'Joinville • SC',
+    photographer: 'Equipe EventosRun',
+    conversionRate: 0.37,
+    totalPhotos: 13400,
+    soldPhotos: 4980,
+    revenueCents: 368900,
+    platformFeePercent: 19,
+    aiReviewStatus: 'pending',
+    flagged: false,
+  },
+  {
+    id: 'evt-9535',
+    title: 'Festival de Dança Urbana',
+    category: 'Eventos culturais',
+    status: 'pending',
+    startAt: '2024-07-05T19:00:00-03:00',
+    endAt: '2024-07-07T23:00:00-03:00',
+    location: 'Belo Horizonte • MG',
+    photographer: 'Juliana Pires',
+    conversionRate: 0.0,
+    totalPhotos: 0,
+    soldPhotos: 0,
+    revenueCents: 0,
+    platformFeePercent: 16,
+    aiReviewStatus: 'blocked',
+    flagged: true,
+  },
+  {
+    id: 'evt-9541',
+    title: 'Campeonato de Natação Masters',
+    category: 'Natação',
+    status: 'published',
+    startAt: '2024-06-29T08:00:00-03:00',
+    endAt: '2024-06-29T18:00:00-03:00',
+    location: 'São Paulo • SP',
+    photographer: 'Aline Castro',
+    conversionRate: 0.48,
+    totalPhotos: 9200,
+    soldPhotos: 4420,
+    revenueCents: 289600,
+    platformFeePercent: 18,
+    aiReviewStatus: 'completed',
+    flagged: false,
+  },
+  {
+    id: 'evt-9550',
+    title: 'Corrida Noturna Porto Alegre',
+    category: 'Corrida de rua',
+    status: 'archived',
+    startAt: '2024-05-12T19:00:00-03:00',
+    endAt: '2024-05-12T23:00:00-03:00',
+    location: 'Porto Alegre • RS',
+    photographer: 'Equipe FlashRun',
+    conversionRate: 0.31,
+    totalPhotos: 15400,
+    soldPhotos: 4780,
+    revenueCents: 258100,
+    platformFeePercent: 20,
+    aiReviewStatus: 'completed',
+    flagged: false,
+  },
+];
+
+export type AdminPhotoStatus = 'published' | 'processing' | 'flagged';
+
+export interface AdminPhotoAsset {
+  id: string;
+  eventId: string;
+  eventTitle: string;
+  photographer: string;
+  uploadedAt: string;
+  status: AdminPhotoStatus;
+  aiConfidence: number;
+  faceMatches: number;
+  downloads: number;
+  priceCents: number;
+  storageRegion: string;
+  flaggedReason?: string;
+}
+
+export const adminPhotoAssets: AdminPhotoAsset[] = [
+  {
+    id: 'pic-78001',
+    eventId: 'evt-9500',
+    eventTitle: 'Meia Maratona Rio Sunrise',
+    photographer: 'Bruno Alves',
+    uploadedAt: '2024-06-16T06:15:00-03:00',
+    status: 'published',
+    aiConfidence: 0.97,
+    faceMatches: 2,
+    downloads: 128,
+    priceCents: 1890,
+    storageRegion: 'GCP • us-central1',
+  },
+  {
+    id: 'pic-78002',
+    eventId: 'evt-9500',
+    eventTitle: 'Meia Maratona Rio Sunrise',
+    photographer: 'Bruno Alves',
+    uploadedAt: '2024-06-16T06:18:00-03:00',
+    status: 'processing',
+    aiConfidence: 0.88,
+    faceMatches: 0,
+    downloads: 0,
+    priceCents: 1890,
+    storageRegion: 'GCP • us-central1',
+  },
+  {
+    id: 'pic-79010',
+    eventId: 'evt-9512',
+    eventTitle: 'Gran Fondo Serra do Mar',
+    photographer: 'Equipe EventosRun',
+    uploadedAt: '2024-06-15T14:40:00-03:00',
+    status: 'published',
+    aiConfidence: 0.92,
+    faceMatches: 3,
+    downloads: 76,
+    priceCents: 2090,
+    storageRegion: 'AWS • sa-east-1',
+  },
+  {
+    id: 'pic-79022',
+    eventId: 'evt-9535',
+    eventTitle: 'Festival de Dança Urbana',
+    photographer: 'Juliana Pires',
+    uploadedAt: '2024-06-14T22:05:00-03:00',
+    status: 'flagged',
+    aiConfidence: 0.54,
+    faceMatches: 0,
+    downloads: 0,
+    priceCents: 1590,
+    storageRegion: 'AWS • sa-east-1',
+    flaggedReason: 'Solicitada revisão manual por baixa nitidez.',
+  },
+  {
+    id: 'pic-80011',
+    eventId: 'evt-9541',
+    eventTitle: 'Campeonato de Natação Masters',
+    photographer: 'Aline Castro',
+    uploadedAt: '2024-06-12T10:30:00-03:00',
+    status: 'published',
+    aiConfidence: 0.95,
+    faceMatches: 1,
+    downloads: 54,
+    priceCents: 1790,
+    storageRegion: 'GCP • us-east1',
+  },
+];
+
+export interface AdminSystemParameters {
+  platformName: string;
+  supportEmail: string;
+  supportWhatsApp: string;
+  defaultCurrency: string;
+  timezone: string;
+  autoArchiveDays: number;
+  instantDeliveryEnabled: boolean;
+  aiMatchingEnabled: boolean;
+  reviewWindowHours: number;
+}
+
+export const adminSystemParameters: AdminSystemParameters = {
+  platformName: 'Olha a Foto Marketplace',
+  supportEmail: 'suporte@olhaafoto.com.br',
+  supportWhatsApp: '+55 11 4002-8922',
+  defaultCurrency: 'BRL',
+  timezone: 'America/Sao_Paulo',
+  autoArchiveDays: 90,
+  instantDeliveryEnabled: true,
+  aiMatchingEnabled: true,
+  reviewWindowHours: 12,
+};
+
+export interface AdminEventCategory {
+  id: string;
+  name: string;
+  description: string;
+  defaultPlatformFee: number;
+}
+
+export const adminEventCategories: AdminEventCategory[] = [
+  {
+    id: 'cat-running',
+    name: 'Corridas e maratonas',
+    description: 'Provas de rua, trail run e eventos de endurance.',
+    defaultPlatformFee: 20,
+  },
+  {
+    id: 'cat-cycling',
+    name: 'Ciclismo',
+    description: 'Competições de estrada, mountain bike e gran fondo.',
+    defaultPlatformFee: 18,
+  },
+  {
+    id: 'cat-swimming',
+    name: 'Natação e águas abertas',
+    description: 'Campeonatos aquáticos e travessias.',
+    defaultPlatformFee: 18,
+  },
+  {
+    id: 'cat-culture',
+    name: 'Eventos culturais',
+    description: 'Shows, festivais, teatro, dança e eventos corporativos.',
+    defaultPlatformFee: 16,
+  },
+  {
+    id: 'cat-education',
+    name: 'Eventos escolares',
+    description: 'Formaturas, colações de grau e competições estudantis.',
+    defaultPlatformFee: 15,
+  },
+];
+
+export interface AdminIntegrationConfig {
+  hasuraEndpoint: string;
+  adminSecretMasked: string;
+  analyticsProvider: string;
+  storageProvider: string;
+  storageRegion: string;
+  cdnDomain: string;
+  paymentGateway: string;
+}
+
+export const adminIntegrationConfig: AdminIntegrationConfig = {
+  hasuraEndpoint: 'https://whatsapp-olha-a-foto-backend.t2wird.easypanel.host/v1/graphql',
+  adminSecretMasked: 'hasura-admin-***',
+  analyticsProvider: 'Posthog Cloud (região: US)',
+  storageProvider: 'Google Cloud Storage',
+  storageRegion: 'us-central1',
+  cdnDomain: 'cdn.olhaafoto.com.br',
+  paymentGateway: 'Pagar.me - marketplace flow',
+};
