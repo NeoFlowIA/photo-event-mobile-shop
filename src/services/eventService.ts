@@ -275,6 +275,9 @@ export interface CreateEventInput {
   category_id: string;
   cover_url: string;
   slug?: string;
+  timezone?: string | null;
+  country?: string | null;
+  currency?: string | null;
 }
 
 function generateEventSlug(title: string) {
@@ -295,11 +298,21 @@ function generateEventSlug(title: string) {
 export async function createEvent(input: CreateEventInput, token: string) {
   try {
     const slug = input.slug ?? generateEventSlug(input.title);
+    const timezone = input.timezone ?? 'America/Sao_Paulo';
+    const country = input.country ?? 'BR';
+    const currency = input.currency ?? 'BRL';
+    const status = input.status ?? 'draft';
+    const visibility = input.visibility ?? 'public';
     const data = await graphqlRequest<{ insert_events_one: EventSummary }>(
       CREATE_EVENT_MUTATION,
       {
         object: {
           ...input,
+          status,
+          visibility,
+          timezone,
+          country,
+          currency,
           slug,
         },
       },
