@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { toast } from '@/hooks/use-toast';
 import { formatCurrency, formatDateTime } from './utils';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 
 const statusLabels: Record<AdminUserStatus, { label: string; badge: string }> = {
   active: { label: 'Ativo', badge: 'bg-emerald-100 text-emerald-700' },
@@ -33,6 +34,23 @@ const Users = () => {
   const [onlyFlagged, setOnlyFlagged] = useState(false);
   const [records, setRecords] = useState(adminUsers);
   const [selectedId, setSelectedId] = useState(records[0]?.id ?? '');
+
+  const totalActive = useMemo(
+    () => records.filter((user) => user.status === 'active').length,
+    [records],
+  );
+  const totalInvited = useMemo(
+    () => records.filter((user) => user.status === 'invited').length,
+    [records],
+  );
+  const flaggedCount = useMemo(
+    () => records.filter((user) => user.flagged).length,
+    [records],
+  );
+  const photographersCount = useMemo(
+    () => records.filter((user) => user.role === 'fotografo').length,
+    [records],
+  );
 
   const filtered = useMemo(() => {
     return records.filter((user) => {
@@ -87,34 +105,62 @@ const Users = () => {
 
   return (
     <div className="space-y-6">
-      <Card className="border-transparent bg-white shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-slate-900">Gestão de usuários</CardTitle>
-          <p className="text-sm text-slate-500">
-            Acompanhe clientes e fotógrafos habilitados no marketplace. Use os filtros para localizar contas e aplicar ações
-            administrativas.
-          </p>
-        </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-4">
+      <AdminPageHeader
+        eyebrow="Administração"
+        title="Gestão de usuários"
+        description="Acompanhe clientes e fotógrafos habilitados no marketplace. Use filtros consistentes para localizar contas e aplicar ações administrativas com confiança."
+        actions={
+          <div className="rounded-2xl border border-slate-200/80 bg-white/70 p-4 text-xs text-slate-500">
+            <p className="font-semibold text-slate-600">Dica rápida</p>
+            <p className="mt-1 leading-relaxed">
+              Use TAB para navegar pelos filtros. Todos os botões e seletores podem ser ativados via teclado.
+            </p>
+          </div>
+        }
+      >
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Total cadastrados</p>
+          <p className="mt-1 text-lg font-semibold text-slate-900">{records.length.toLocaleString('pt-BR')}</p>
+        </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Ativos</p>
+          <p className="mt-1 text-lg font-semibold text-emerald-600">{totalActive.toLocaleString('pt-BR')}</p>
+        </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Convites pendentes</p>
+          <p className="mt-1 text-lg font-semibold text-amber-600">{totalInvited.toLocaleString('pt-BR')}</p>
+        </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Fotógrafos verificados</p>
+          <p className="mt-1 text-lg font-semibold text-slate-900">{photographersCount.toLocaleString('pt-BR')}</p>
+        </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Contas sinalizadas</p>
+          <p className="mt-1 text-lg font-semibold text-rose-600">{flaggedCount.toLocaleString('pt-BR')}</p>
+        </div>
+      </AdminPageHeader>
+
+      <Card className="border border-slate-200/80 bg-white/80 shadow-sm">
+        <CardContent className="grid gap-4 p-6 md:grid-cols-4">
           <div className="md:col-span-2">
-            <label className="text-xs font-medium uppercase text-slate-500">Busca</label>
+            <label className="text-[0.7rem] font-semibold uppercase tracking-wide text-slate-500">Busca</label>
             <Input
               placeholder="Nome, e-mail ou telefone"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              className="mt-1"
+              className="mt-2"
             />
           </div>
           <div>
-            <label className="text-xs font-medium uppercase text-slate-500">Perfil</label>
-            <div className="mt-1 flex gap-2">
+            <label className="text-[0.7rem] font-semibold uppercase tracking-wide text-slate-500">Perfil</label>
+            <div className="mt-2 flex gap-2">
               {(['all', 'cliente', 'fotografo', 'admin'] as const).map((role) => (
                 <Button
                   key={role}
                   size="sm"
                   variant={roleFilter === role ? 'default' : 'outline'}
                   onClick={() => setRoleFilter(role)}
-                  className="flex-1"
+                  className="flex-1 rounded-lg"
                 >
                   {role === 'all' ? 'Todos' : roleLabels[role]}
                 </Button>
@@ -122,33 +168,33 @@ const Users = () => {
             </div>
           </div>
           <div>
-            <label className="text-xs font-medium uppercase text-slate-500">Status</label>
-            <div className="mt-1 flex gap-2">
+            <label className="text-[0.7rem] font-semibold uppercase tracking-wide text-slate-500">Status</label>
+            <div className="mt-2 flex gap-2">
               {(['all', 'active', 'suspended', 'invited'] as const).map((status) => (
                 <Button
                   key={status}
                   size="sm"
                   variant={statusFilter === status ? 'default' : 'outline'}
                   onClick={() => setStatusFilter(status)}
-                  className="flex-1"
+                  className="flex-1 rounded-lg"
                 >
                   {status === 'all' ? 'Todos' : statusLabels[status].label}
                 </Button>
               ))}
             </div>
           </div>
-          <div className="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2">
+          <div className="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white/70 px-3 py-3">
             <div>
-              <p className="text-xs font-semibold uppercase text-slate-500">Somente sinalizados</p>
+              <p className="text-[0.7rem] font-semibold uppercase tracking-wide text-slate-500">Somente sinalizados</p>
               <p className="text-xs text-slate-500">Contas com pendências de compliance.</p>
             </div>
-            <Switch checked={onlyFlagged} onCheckedChange={setOnlyFlagged} />
+            <Switch checked={onlyFlagged} onCheckedChange={setOnlyFlagged} aria-label="Filtrar contas sinalizadas" />
           </div>
         </CardContent>
       </Card>
 
       <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
-        <Card className="border-transparent bg-white shadow-sm">
+        <Card className="border border-slate-200/80 bg-white/80 shadow-sm">
           <CardHeader>
             <CardTitle className="text-base font-semibold text-slate-800">{filtered.length} usuários encontrados</CardTitle>
             <p className="text-sm text-slate-500">Clique para ver os detalhes completos e aplicar ações pontuais.</p>
@@ -196,7 +242,7 @@ const Users = () => {
         </Card>
 
         {selectedUser && (
-          <Card className="border-transparent bg-white shadow-sm">
+          <Card className="border border-slate-200/80 bg-white/80 shadow-sm">
             <CardHeader>
               <CardTitle className="text-base font-semibold text-slate-800">Detalhes do usuário</CardTitle>
               <p className="text-sm text-slate-500">Resumo financeiro e status de compliance.</p>

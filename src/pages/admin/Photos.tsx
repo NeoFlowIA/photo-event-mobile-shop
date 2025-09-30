@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { formatCurrency, formatDateTime, formatPercent } from './utils';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 
 const statusLabels: Record<AdminPhotoStatus, { label: string; badge: string }> = {
   published: { label: 'Publicado', badge: 'bg-emerald-100 text-emerald-700' },
@@ -47,6 +48,24 @@ const Photos = () => {
     [assets, selectedId, filtered],
   );
 
+  const publishedCount = useMemo(
+    () => assets.filter((asset) => asset.status === 'published').length,
+    [assets],
+  );
+  const processingCount = useMemo(
+    () => assets.filter((asset) => asset.status === 'processing').length,
+    [assets],
+  );
+  const flaggedCount = useMemo(
+    () => assets.filter((asset) => asset.status === 'flagged').length,
+    [assets],
+  );
+  const averageConfidence = useMemo(() => {
+    if (assets.length === 0) return 0;
+    const total = assets.reduce((sum, asset) => sum + asset.aiConfidence, 0);
+    return total / assets.length;
+  }, [assets]);
+
   const updateAssetStatus = (asset: AdminPhotoAsset, status: AdminPhotoStatus, reason?: string) => {
     setAssets((prev) =>
       prev.map((item) => (item.id === asset.id ? { ...item, status, flaggedReason: reason } : item)),
@@ -72,27 +91,44 @@ const Photos = () => {
 
   return (
     <div className="space-y-6">
-      <Card className="border-transparent bg-white shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-slate-900">Gestão de fotos</CardTitle>
-          <p className="text-sm text-slate-500">
-            Acompanhe o fluxo de uploads, aprovação assistida por IA e liberação para venda das fotos nos eventos.
-          </p>
-        </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-4">
+      <AdminPageHeader
+        eyebrow="Conteúdo"
+        title="Gestão de fotos"
+        description="Acompanhe o fluxo de uploads, aprovação assistida por IA e liberação para venda das fotos nos eventos."
+      >
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Catálogo publicado</p>
+          <p className="mt-1 text-lg font-semibold text-slate-900">{publishedCount.toLocaleString('pt-BR')}</p>
+        </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Processamento em curso</p>
+          <p className="mt-1 text-lg font-semibold text-amber-600">{processingCount.toLocaleString('pt-BR')}</p>
+        </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Fila de revisão</p>
+          <p className="mt-1 text-lg font-semibold text-rose-600">{flaggedCount.toLocaleString('pt-BR')}</p>
+        </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Confiança média da IA</p>
+          <p className="mt-1 text-lg font-semibold text-primary">{formatPercent(averageConfidence)}%</p>
+        </div>
+      </AdminPageHeader>
+
+      <Card className="border border-slate-200/80 bg-white/80 shadow-sm">
+        <CardContent className="grid gap-4 p-6 md:grid-cols-4">
           <div className="md:col-span-2">
-            <label className="text-xs font-medium uppercase text-slate-500">Busca</label>
+            <label className="text-[0.7rem] font-semibold uppercase tracking-wide text-slate-500">Busca</label>
             <Input
               placeholder="Evento ou fotógrafo"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              className="mt-1"
+              className="mt-2"
             />
           </div>
           <div>
-            <label className="text-xs font-medium uppercase text-slate-500">Status</label>
+            <label className="text-[0.7rem] font-semibold uppercase tracking-wide text-slate-500">Status</label>
             <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as 'all' | AdminPhotoStatus)}>
-              <SelectTrigger className="mt-1">
+              <SelectTrigger className="mt-2">
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
               <SelectContent>
@@ -104,9 +140,9 @@ const Photos = () => {
             </Select>
           </div>
           <div>
-            <label className="text-xs font-medium uppercase text-slate-500">Evento</label>
+            <label className="text-[0.7rem] font-semibold uppercase tracking-wide text-slate-500">Evento</label>
             <Select value={eventFilter} onValueChange={(value) => setEventFilter(value)}>
-              <SelectTrigger className="mt-1">
+              <SelectTrigger className="mt-2">
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
               <SelectContent>
@@ -123,7 +159,7 @@ const Photos = () => {
       </Card>
 
       <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
-        <Card className="border-transparent bg-white shadow-sm">
+        <Card className="border border-slate-200/80 bg-white/80 shadow-sm">
           <CardHeader>
             <CardTitle className="text-base font-semibold text-slate-800">{filtered.length} fotos filtradas</CardTitle>
             <p className="text-sm text-slate-500">Selecione um item para revisar detalhes técnicos e tomar ações.</p>
@@ -171,7 +207,7 @@ const Photos = () => {
         </Card>
 
         {selectedAsset && (
-          <Card className="border-transparent bg-white shadow-sm">
+          <Card className="border border-slate-200/80 bg-white/80 shadow-sm">
             <CardHeader>
               <CardTitle className="text-base font-semibold text-slate-800">Detalhes da foto</CardTitle>
               <p className="text-sm text-slate-500">Informações técnicas do processamento automático.</p>
