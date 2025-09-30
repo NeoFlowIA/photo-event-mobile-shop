@@ -7,43 +7,38 @@ import {
   Images,
   Settings,
   Menu,
+  X,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Separator } from '@/components/ui/separator';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { useAuth } from '@/contexts/AuthContext';
 
 const navItems = [
   {
     to: '/admin',
     label: 'Dashboard',
-    description: 'Visão geral do marketplace',
     icon: LayoutDashboard,
     end: true,
   },
   {
     to: '/admin/usuarios',
-    label: 'Gestão de usuários',
-    description: 'Clientes e fotógrafos',
+    label: 'Usuários',
     icon: Users,
   },
   {
     to: '/admin/eventos',
-    label: 'Gestão de eventos',
-    description: 'Aprovação e performance',
+    label: 'Eventos',
     icon: CalendarCheck,
   },
   {
     to: '/admin/fotos',
-    label: 'Gestão de fotos',
-    description: 'Fluxo de uploads e moderação',
+    label: 'Fotos',
     icon: Images,
   },
   {
     to: '/admin/configuracoes',
     label: 'Configurações',
-    description: 'Parâmetros do sistema',
     icon: Settings,
   },
 ];
@@ -54,7 +49,7 @@ const AdminLayout = () => {
   const [openMobile, setOpenMobile] = useState(false);
 
   const renderNavigation = (onNavigate?: () => void) => (
-    <nav className="space-y-1">
+    <nav className="space-y-2">
       {navItems.map((item) => {
         const Icon = item.icon;
         return (
@@ -65,82 +60,107 @@ const AdminLayout = () => {
             onClick={() => onNavigate?.()}
             className={({ isActive }) =>
               [
-                'flex flex-col rounded-lg border px-4 py-3 transition-colors',
+                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
                 isActive
-                  ? 'border-primary/40 bg-primary/5 text-primary'
-                  : 'border-transparent bg-white text-slate-700 hover:border-primary/20 hover:bg-primary/5',
+                  ? 'bg-[hsl(var(--admin-primary))] text-white'
+                  : 'text-slate-700 hover:bg-slate-100',
               ].join(' ')
             }
           >
-            <div className="flex items-center gap-3">
-              <span className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/10 text-primary">
-                <Icon size={18} />
-              </span>
-              <div>
-                <p className="text-sm font-semibold leading-tight">{item.label}</p>
-                <p className="text-xs text-slate-500">{item.description}</p>
-              </div>
-            </div>
+            <Icon size={18} />
+            <span>{item.label}</span>
           </NavLink>
         );
       })}
     </nav>
   );
 
+  const activeNavItem = navItems.find((item) => 
+    item.end ? pathname === item.to : pathname.startsWith(item.to)
+  );
+
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+    <div className="min-h-screen bg-[hsl(var(--admin-bg))]">
+      {/* Header */}
+      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
+        <div className="flex h-16 items-center justify-between px-6">
+          {/* Logo + Menu */}
           <div className="flex items-center gap-4">
-            <img
-              src="/lovable-uploads/f596c292-f0ef-4243-9d2e-647a4765cfbf.png"
-              alt="Olha a Foto"
-              className="h-10 w-10 rounded-lg border border-slate-200 object-cover"
-              onError={(event) => {
-                const target = event.target as HTMLImageElement;
-                target.src = 'https://via.placeholder.com/48x48/E03A3A/FFFFFF?text=OF';
-              }}
-            />
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-primary">Painel administrativo</p>
-              <h1 className="text-lg font-semibold text-slate-900">Marketplace Olha a Foto</h1>
-              <p className="text-xs text-slate-500">Controle operações, finanças e qualidade em um só lugar.</p>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setOpenMobile(true)} 
+              className="lg:hidden"
+              aria-label="Abrir menu"
+            >
+              <Menu size={20} />
+            </Button>
+            
+            <div className="flex items-center gap-3">
+              <img
+                src="/lovable-uploads/f596c292-f0ef-4243-9d2e-647a4765cfbf.png"
+                alt="Olha a Foto"
+                className="h-8 w-8 rounded object-cover"
+                onError={(event) => {
+                  const target = event.target as HTMLImageElement;
+                  target.src = 'https://via.placeholder.com/32x32/006CFF/FFFFFF?text=OF';
+                }}
+              />
+              <div className="hidden sm:block">
+                <h1 className="text-sm font-semibold text-slate-900">Painel Administrativo</h1>
+                <p className="text-xs text-slate-500">Olha a Foto Marketplace</p>
+              </div>
             </div>
           </div>
-          <div className="hidden flex-col items-end sm:flex">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Sessão ativa</span>
-            <span className="text-sm font-semibold text-slate-900">{user?.displayName ?? 'Administrador'}</span>
-            <span className="text-xs text-slate-500">{pathname}</span>
-          </div>
-          <div className="sm:hidden">
-            <Button variant="outline" size="icon" onClick={() => setOpenMobile(true)} aria-label="Abrir menu">
-              <Menu size={18} />
-            </Button>
+
+          {/* User info */}
+          <div className="flex items-center gap-3">
+            <div className="hidden text-right sm:block">
+              <p className="text-sm font-medium text-slate-900">{user?.displayName ?? 'Admin'}</p>
+              <p className="text-xs text-slate-500">{activeNavItem?.label ?? 'Dashboard'}</p>
+            </div>
+            <div className="h-9 w-9 rounded-full bg-[hsl(var(--admin-primary))] flex items-center justify-center text-white text-sm font-medium">
+              {(user?.displayName ?? 'A')[0].toUpperCase()}
+            </div>
           </div>
         </div>
       </header>
 
-      <div className="mx-auto flex max-w-6xl gap-6 px-6 py-8">
-        <aside className="hidden w-72 shrink-0 lg:block">{renderNavigation()}</aside>
+      <div className="flex">
+        {/* Desktop Sidebar */}
+        <aside className="hidden lg:block w-64 border-r border-slate-200 bg-white min-h-[calc(100vh-4rem)] p-6">
+          {renderNavigation()}
+        </aside>
 
-        <main className="flex-1">
-          <div className="mb-6 flex items-center gap-2 text-xs text-slate-500">
-            <span>Home</span>
-            <span>/</span>
-            <span className="capitalize">
-              {navItems.find((item) => (item.end ? pathname === item.to : pathname.startsWith(item.to)))?.label ?? 'Dashboard'}
-            </span>
-          </div>
+        {/* Main Content */}
+        <main className="flex-1 p-6 lg:p-8">
           <Outlet />
         </main>
       </div>
 
+      {/* Mobile Sidebar */}
       <Sheet open={openMobile} onOpenChange={setOpenMobile}>
-        <SheetContent side="left" className="w-[20rem]">
-          <SheetHeader>
-            <SheetTitle>Navegação</SheetTitle>
-          </SheetHeader>
-          <Separator className="my-4" />
+        <SheetContent side="left" className="w-64 p-6">
+          <div className="mb-6 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <img
+                src="/lovable-uploads/f596c292-f0ef-4243-9d2e-647a4765cfbf.png"
+                alt="Olha a Foto"
+                className="h-8 w-8 rounded object-cover"
+              />
+              <div>
+                <h2 className="text-sm font-semibold text-slate-900">Painel Admin</h2>
+                <p className="text-xs text-slate-500">Navegação</p>
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setOpenMobile(false)}
+            >
+              <X size={18} />
+            </Button>
+          </div>
           {renderNavigation(() => setOpenMobile(false))}
         </SheetContent>
       </Sheet>

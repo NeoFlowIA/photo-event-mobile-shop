@@ -73,13 +73,8 @@ const registerSchema = z
       }
     }
 
-    const urlFields: Array<keyof Pick<RegisterFormValues, 'websiteUrl' | 'profileImageUrl' | 'coverImageUrl'>> = [
-      'websiteUrl',
-      'profileImageUrl',
-      'coverImageUrl',
-    ];
-
-    urlFields.forEach((field) => {
+    // Validar URLs
+    (['websiteUrl', 'profileImageUrl', 'coverImageUrl'] as const).forEach((field) => {
       const value = data[field];
       if (value && value.trim() && !/^https?:\/\//i.test(value.trim())) {
         ctx.addIssue({

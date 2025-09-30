@@ -372,7 +372,12 @@ const EventDetailPage = () => {
 
       <Navbar />
 
-      <CpfModal open={showCpfModal} onOpenChange={setShowCpfModal} />
+      <CpfModal 
+        open={showCpfModal} 
+        onOpenChange={setShowCpfModal}
+        onClose={() => setShowCpfModal(false)}
+        onConfirm={() => setShowCpfModal(false)}
+      />
     </div>
   );
 };

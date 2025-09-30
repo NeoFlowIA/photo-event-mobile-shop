@@ -6,12 +6,12 @@ import { MapPin, Camera, Star, X } from 'lucide-react';
 import HirePhotographerModal from './HirePhotographerModal';
 
 interface Photographer {
-  id: number;
+  id: string | number;
   name: string;
   handle: string;
   image: string;
   city: string;
-  rating: number;
+  rating: number | string;
   portfolio: string[];
   specialty: string;
   description: string;

@@ -46,6 +46,13 @@
     --brand-text: #111827;
     --brand-muted: #6B7280;
     --brand-stroke: #E5E7EB;
+
+    /* Admin Panel Colors */
+    --admin-primary: 207 100% 50%;      /* #006CFF */
+    --admin-secondary: 220 70% 16%;     /* #0A1F44 */
+    --admin-accent: 191 100% 50%;       /* #00C2FF */
+    --admin-bg: 214 26% 96%;            /* #F0F4F8 */
+    --admin-surface: 0 0% 100%;         /* #FFFFFF */
   }
 }
 

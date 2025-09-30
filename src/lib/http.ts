@@ -12,9 +12,10 @@ export class ApiError extends Error {
   }
 }
 
-interface ApiFetchOptions extends RequestInit {
+interface ApiFetchOptions extends Omit<RequestInit, 'body'> {
   authToken?: string;
   skipJson?: boolean;
+  body?: unknown;
 }
 
 export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): Promise<T> {
@@ -33,7 +34,7 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...rest,
     headers: requestHeaders,
-    body: typeof body === "string" || body === undefined ? body : JSON.stringify(body),
+    body: (typeof body === "string" || body === undefined ? body : JSON.stringify(body)) as BodyInit | undefined,
   });
 
   if (response.status === 204 || skipJson) {

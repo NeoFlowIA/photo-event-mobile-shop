@@ -97,7 +97,7 @@ const PhotographerPortfolio = () => {
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
               <div>
                 <h1 className="text-3xl font-bold">{user?.displayName}</h1>
-                <p className="text-xl text-muted-foreground mb-2">{user?.photographerProfile?.handle}</p>
+                <p className="text-xl text-muted-foreground mb-2">@{user?.displayName?.toLowerCase().replace(/\s+/g, '.')}</p>
                 <p className="text-muted-foreground mb-4">{user?.photographerProfile?.biography}</p>
 
                 <div className="flex flex-col gap-2">

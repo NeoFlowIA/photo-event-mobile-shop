@@ -11,10 +11,17 @@ import { useAuth } from '@/contexts/AuthContext';
 interface CpfModalProps {
   open: boolean;
   onClose: () => void;
+  onOpenChange?: (open: boolean) => void;
   onConfirm: () => void;
 }
 
-const CpfModal = ({ open, onClose, onConfirm }: CpfModalProps) => {
+const CpfModal = ({ open, onClose, onOpenChange, onConfirm }: CpfModalProps) => {
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      onClose();
+    }
+    onOpenChange?.(newOpen);
+  };
   const { setCpf } = useAuth();
   const [cpf, setCpfValue] = useState('');
   const [saveForFuture, setSaveForFuture] = useState(false);
@@ -51,7 +58,7 @@ const CpfModal = ({ open, onClose, onConfirm }: CpfModalProps) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Identificação rápida</DialogTitle>
