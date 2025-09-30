@@ -20,10 +20,12 @@ import PhotographerEventCreate from "./pages/PhotographerEventCreate";
 import PhotographerEventDetails from "./pages/PhotographerEventDetails";
 import PhotographerCollaborations from "./pages/PhotographerCollaborations";
 import PhotographerRoute from "./components/PhotographerRoute";
+import AdminRoute from "./components/AdminRoute";
 import DebugSessionBadge from "./components/DebugSessionBadge";
 import EventDetail from "./pages/EventDetail";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/AuthContext";
+import AdminDashboard from "./pages/AdminDashboard";
 
 const queryClient = new QueryClient();
 
@@ -131,7 +133,12 @@ const App = () => (
               <PhotographerCollaborations />
             </PhotographerRoute>
           } />
-          
+          <Route path="/admin/*" element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          } />
+
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
           </Routes>

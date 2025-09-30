@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingCart, Camera, Search, User, ChevronDown } from 'lucide-react';
+import { ShoppingCart, Camera, Search, User, ChevronDown, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,7 +8,7 @@ import AuthModal from './AuthModal';
 
 const TopBar = () => {
   const navigate = useNavigate();
-  const { user, logout, isPhotographer, isUser, isAuthenticated, pendingAction } = useAuth();
+  const { user, logout, isPhotographer, isUser, isAuthenticated, pendingAction, isAdmin } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Listen for custom event to open auth modal
@@ -64,6 +64,16 @@ const TopBar = () => {
             {isAuthenticated ? (
               <>
                 <nav className="hidden sm:flex items-center gap-4">
+                  {isAdmin && (
+                    <button
+                      onClick={() => navigate('/admin')}
+                      className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
+                      aria-label="Painel administrativo"
+                    >
+                      <ShieldCheck size={16} />
+                      <span className="hidden md:inline">Painel admin</span>
+                    </button>
+                  )}
                   {isPhotographer ? (
                     <>
                       <button
@@ -116,6 +126,11 @@ const TopBar = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                    {isAdmin && (
+                      <DropdownMenuItem onClick={() => navigate('/admin')}>
+                        Painel administrativo
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem onClick={() => navigate('/perfil')}>
                       Meu Perfil
                     </DropdownMenuItem>

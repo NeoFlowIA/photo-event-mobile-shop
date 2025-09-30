@@ -26,6 +26,7 @@ interface AuthContextValue {
   currentRole: AuthRole | null;
   isPhotographer: boolean;
   isUser: boolean;
+  isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -266,6 +267,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       currentRole,
       isPhotographer: hasRole('photographer'),
       isUser: hasRole('user'),
+      isAdmin: hasRole('admin'),
     };
   }, [accessToken, refreshToken, refreshTokenExpiresAt, isInitializing, login, logout, pendingAction, refresh, register, setCpf, updateUser, user]);
 
