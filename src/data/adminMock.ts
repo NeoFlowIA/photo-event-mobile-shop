@@ -630,7 +630,7 @@ export interface AdminIntegrationConfig {
 }
 
 export const adminIntegrationConfig: AdminIntegrationConfig = {
-  hasuraEndpoint: 'https://whatsapp-olha-a-foto-backend.t2wird.easypanel.host/v1/graphql',
+  hasuraEndpoint: 'https://infra-olha-a-foto-backend.k3p3ex.easypanel.host/v1/graphql',
   adminSecretMasked: 'hasura-admin-***',
   analyticsProvider: 'Posthog Cloud (região: US)',
   storageProvider: 'Google Cloud Storage',

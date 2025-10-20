@@ -78,6 +78,9 @@ VITE_HASURA_ADMIN_SECRET=mysecretkey # substitua pelo segredo correto em produç
 
 The admin secret is required to listar eventos públicos (busca) enquanto o token JWT (obtido via backend de autenticação) será encaminhado automaticamente para operações autenticadas como criar, listar e remover eventos do fotógrafo.
 
+> [!NOTE]
+> Para evitar inconsistências, valores legados (`https://whatsapp-olha-a-foto-backend.t2wird.easypanel.host`) definidos em `VITE_API_BASE_URL` são ignorados automaticamente e substituídos pelo endpoint `infra`. Atualize o seu `.env` para o novo host quando for necessário apontar a aplicação para outro backend.
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/3412fe1e-9430-4a93-9ee1-ba28dca3541f) and click on Share -> Publish.

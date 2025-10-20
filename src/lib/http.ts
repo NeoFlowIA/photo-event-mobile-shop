@@ -1,12 +1,36 @@
 const DEFAULT_API_BASE_URL = "https://infra-olha-a-foto-backend.k3p3ex.easypanel.host";
+const LEGACY_API_BASE_URLS = new Set([
+  "https://whatsapp-olha-a-foto-backend.t2wird.easypanel.host",
+  "https://whatsapp-olha-a-foto-backend.t2wird.easypanel.host/",
+]);
 
-const envApiBase = import.meta.env.VITE_API_BASE_URL?.trim();
-const normalizedApiBase = envApiBase && envApiBase.length > 0 ? envApiBase : DEFAULT_API_BASE_URL;
+function normalizeBaseUrl(value: string | undefined): string | undefined {
+  if (!value) return undefined;
 
-if ((!envApiBase || envApiBase.length === 0) && typeof console !== "undefined") {
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+
+  return trimmed.replace(/\/+$/, "");
+}
+
+const normalizedDefaultApiBaseUrl = normalizeBaseUrl(DEFAULT_API_BASE_URL) ?? DEFAULT_API_BASE_URL;
+
+const envApiBase = normalizeBaseUrl(import.meta.env.VITE_API_BASE_URL);
+
+let effectiveApiBase = envApiBase ?? normalizedDefaultApiBaseUrl;
+
+if (envApiBase && LEGACY_API_BASE_URLS.has(envApiBase)) {
+  effectiveApiBase = normalizedDefaultApiBaseUrl;
+  if (typeof console !== "undefined") {
+    console.warn(
+      "Detected legacy API endpoint in VITE_API_BASE_URL. Using the new infra endpoint instead:",
+      normalizedDefaultApiBaseUrl,
+    );
+  }
+} else if (!envApiBase && typeof console !== "undefined") {
   console.warn(
     "VITE_API_BASE_URL is not defined. Falling back to default API base URL:",
-    DEFAULT_API_BASE_URL,
+    normalizedDefaultApiBaseUrl,
   );
 }
 
@@ -15,13 +39,12 @@ function buildApiUrl(path: string): string {
     return path;
   }
 
-  const sanitizedBase = normalizedApiBase.replace(/\/+$/, "");
   const sanitizedPath = path.startsWith("/") ? path : `/${path}`;
 
-  return `${sanitizedBase}${sanitizedPath}`;
+  return `${effectiveApiBase}${sanitizedPath}`;
 }
 
-export const API_BASE_URL = normalizedApiBase;
+export const API_BASE_URL = effectiveApiBase;
 
 export class ApiError extends Error {
   public readonly status: number;
