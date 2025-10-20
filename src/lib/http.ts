@@ -1,4 +1,6 @@
-export const API_BASE_URL = "https://whatsapp-olha-a-foto-backend.t2wird.easypanel.host";
+const DEFAULT_API_BASE_URL = "https://whatsapp-olha-a-foto-backend.t2wird.easypanel.host";
+
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? DEFAULT_API_BASE_URL;
 
 export class ApiError extends Error {
   public readonly status: number;

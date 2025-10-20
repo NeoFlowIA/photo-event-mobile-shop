@@ -71,6 +71,7 @@ cp .env.example .env
 Edit `.env` and provide your credentials:
 
 ```dotenv
+VITE_API_BASE_URL=https://whatsapp-olha-a-foto-backend.t2wird.easypanel.host
 VITE_HASURA_GRAPHQL_URL=https://whatsapp-hasura.t2wird.easypanel.host/v1/graphql
 VITE_HASURA_ADMIN_SECRET=mysecretkey # substitua pelo segredo correto em produção
 ```
