@@ -1,6 +1,20 @@
 const DEFAULT_API_BASE_URL = "https://whatsapp-olha-a-foto-backend.t2wird.easypanel.host";
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? DEFAULT_API_BASE_URL;
+const envApiBase = import.meta.env.VITE_API_BASE_URL?.trim();
+const normalizedApiBase = envApiBase && envApiBase.length > 0 ? envApiBase : DEFAULT_API_BASE_URL;
+
+function buildApiUrl(path: string): string {
+  if (/^https?:\/\//i.test(path)) {
+    return path;
+  }
+
+  const sanitizedBase = normalizedApiBase.replace(/\/+$/, "");
+  const sanitizedPath = path.startsWith("/") ? path : `/${path}`;
+
+  return `${sanitizedBase}${sanitizedPath}`;
+}
+
+export const API_BASE_URL = normalizedApiBase;
 
 export class ApiError extends Error {
   public readonly status: number;
@@ -33,7 +47,9 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
     requestHeaders["Authorization"] = `Bearer ${authToken}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const requestUrl = buildApiUrl(path);
+
+  const response = await fetch(requestUrl, {
     ...rest,
     headers: requestHeaders,
     body: (typeof body === "string" || body === undefined ? body : JSON.stringify(body)) as BodyInit | undefined,
