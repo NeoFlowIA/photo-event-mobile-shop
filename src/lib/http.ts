@@ -1,7 +1,14 @@
-const DEFAULT_API_BASE_URL = "https://whatsapp-olha-a-foto-backend.t2wird.easypanel.host";
+const DEFAULT_API_BASE_URL = "https://infra-olha-a-foto-backend.k3p3ex.easypanel.host";
 
 const envApiBase = import.meta.env.VITE_API_BASE_URL?.trim();
 const normalizedApiBase = envApiBase && envApiBase.length > 0 ? envApiBase : DEFAULT_API_BASE_URL;
+
+if ((!envApiBase || envApiBase.length === 0) && typeof console !== "undefined") {
+  console.warn(
+    "VITE_API_BASE_URL is not defined. Falling back to default API base URL:",
+    DEFAULT_API_BASE_URL,
+  );
+}
 
 function buildApiUrl(path: string): string {
   if (/^https?:\/\//i.test(path)) {
