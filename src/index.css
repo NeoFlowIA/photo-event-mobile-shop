@@ -16,7 +16,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 13% 15%;
 
-    --primary: 354 82% 53%;
+    --primary: 6 100% 59%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 220 26% 28%;
@@ -25,7 +25,7 @@
     --muted: 215 16% 93%;
     --muted-foreground: 220 13% 46%;
 
-    --accent: 8 100% 70%;
+    --accent: 6 100% 92%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
@@ -38,9 +38,9 @@
     --radius: 0.75rem;
 
     /* Brand Color Tokens */
-    --brand-primary: #E03A3A;
+    --brand-primary: #FF3B30;
     --brand-secondary: #0A1F44;
-    --brand-accent: #FF6B6B;
+    --brand-accent: #FFD9D6;
     --brand-bg: #F7F9FC;
     --brand-surface: #FFFFFF;
     --brand-text: #111827;

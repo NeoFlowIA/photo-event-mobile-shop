@@ -26,10 +26,10 @@ export default {
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
-				primary: {
-					DEFAULT: '#E4251A', // Brand red color
-					foreground: '#FFFFFF'
-				},
+                                primary: {
+                                        DEFAULT: '#FF3B30',
+                                        foreground: '#FFFFFF'
+                                },
 				secondary: {
 					DEFAULT: '#f5f5f5',
 					foreground: '#333333'
@@ -95,18 +95,23 @@ export default {
 					'0%': { transform: 'translateY(10px)', opacity: '0' },
 					'100%': { transform: 'translateY(0)', opacity: '1' }
 				},
-				'slide-down': {
-					'0%': { transform: 'translateY(-10px)', opacity: '0' },
-					'100%': { transform: 'translateY(0)', opacity: '1' }
-				}
-			},
-			animation: {
-				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out',
-				'fade-in': 'fade-in 0.3s ease-out',
-				'slide-up': 'slide-up 0.3s ease-out',
-				'slide-down': 'slide-down 0.3s ease-out'
-			}
+                                'slide-down': {
+                                        '0%': { transform: 'translateY(-10px)', opacity: '0' },
+                                        '100%': { transform: 'translateY(0)', opacity: '1' }
+                                },
+                                float: {
+                                        '0%, 100%': { transform: 'translateY(0)' },
+                                        '50%': { transform: 'translateY(-14px)' }
+                                }
+                        },
+                        animation: {
+                                'accordion-down': 'accordion-down 0.2s ease-out',
+                                'accordion-up': 'accordion-up 0.2s ease-out',
+                                'fade-in': 'fade-in 0.3s ease-out',
+                                'slide-up': 'slide-up 0.3s ease-out',
+                                'slide-down': 'slide-down 0.3s ease-out',
+                                float: 'float 6s ease-in-out infinite'
+                        }
 		}
 	},
         plugins: [animatePlugin],
