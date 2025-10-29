@@ -1,4 +1,50 @@
-export const API_BASE_URL = "https://whatsapp-olha-a-foto-backend.t2wird.easypanel.host";
+const DEFAULT_API_BASE_URL = "https://infra-olha-a-foto-backend.k3p3ex.easypanel.host";
+const LEGACY_API_BASE_URLS = new Set([
+  "https://whatsapp-olha-a-foto-backend.t2wird.easypanel.host",
+  "https://whatsapp-olha-a-foto-backend.t2wird.easypanel.host/",
+]);
+
+function normalizeBaseUrl(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+
+  return trimmed.replace(/\/+$/, "");
+}
+
+const normalizedDefaultApiBaseUrl = normalizeBaseUrl(DEFAULT_API_BASE_URL) ?? DEFAULT_API_BASE_URL;
+
+const envApiBase = normalizeBaseUrl(import.meta.env.VITE_API_BASE_URL);
+
+let effectiveApiBase = envApiBase ?? normalizedDefaultApiBaseUrl;
+
+if (envApiBase && LEGACY_API_BASE_URLS.has(envApiBase)) {
+  effectiveApiBase = normalizedDefaultApiBaseUrl;
+  if (typeof console !== "undefined") {
+    console.warn(
+      "Detected legacy API endpoint in VITE_API_BASE_URL. Using the new infra endpoint instead:",
+      normalizedDefaultApiBaseUrl,
+    );
+  }
+} else if (!envApiBase && typeof console !== "undefined") {
+  console.warn(
+    "VITE_API_BASE_URL is not defined. Falling back to default API base URL:",
+    normalizedDefaultApiBaseUrl,
+  );
+}
+
+function buildApiUrl(path: string): string {
+  if (/^https?:\/\//i.test(path)) {
+    return path;
+  }
+
+  const sanitizedPath = path.startsWith("/") ? path : `/${path}`;
+
+  return `${effectiveApiBase}${sanitizedPath}`;
+}
+
+export const API_BASE_URL = effectiveApiBase;
 
 export class ApiError extends Error {
   public readonly status: number;
@@ -31,7 +77,9 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
     requestHeaders["Authorization"] = `Bearer ${authToken}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const requestUrl = buildApiUrl(path);
+
+  const response = await fetch(requestUrl, {
     ...rest,
     headers: requestHeaders,
     body: (typeof body === "string" || body === undefined ? body : JSON.stringify(body)) as BodyInit | undefined,
