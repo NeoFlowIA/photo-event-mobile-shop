@@ -51,7 +51,7 @@ const SearchBar = ({ onSearch, onSortChange }: SearchBarProps) => {
   };
 
   return (
-    <section className="py-6 bg-muted/30">
+    <section id="marketplace-event-search" className="py-6 bg-muted/30">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex flex-col lg:flex-row gap-4 items-end">
@@ -61,6 +61,7 @@ const SearchBar = ({ onSearch, onSortChange }: SearchBarProps) => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
+                id="marketplace-event-search-input"
                 className="h-12 rounded-xl px-4 py-2 bg-[var(--brand-surface)] border border-[var(--brand-stroke)] text-[var(--brand-text)] focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-[var(--brand-primary)]"
                 aria-label="Pesquisar eventos"
               />

@@ -1,7 +1,15 @@
 import { useState } from 'react';
-import { Camera } from 'lucide-react';
+import { Camera, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel';
+import { heroHighlights } from '@/data/heroHighlights';
 import { useAuth } from '@/contexts/AuthContext';
 import CpfModal from './CpfModal';
 import HirePhotographerModal from './HirePhotographerModal';
@@ -13,6 +21,20 @@ const Hero = () => {
   const [showCpfModal, setShowCpfModal] = useState(false);
   const [showHireModal, setShowHireModal] = useState(false);
   const [pendingAction, setPendingAction] = useState<'selfie' | null>(null);
+
+  const handleFindEventClick = () => {
+    if (typeof document === 'undefined') return;
+
+    const section = document.querySelector('#marketplace-event-search');
+    section?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    setTimeout(() => {
+      const input = document.getElementById(
+        'marketplace-event-search-input',
+      ) as HTMLInputElement | null;
+      input?.focus();
+    }, 600);
+  };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -96,24 +118,63 @@ const Hero = () => {
 
       <div className="container mx-auto px-4 text-center">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-8">
-            <span className="text-[var(--brand-secondary)]">Capture a emoção,</span>
-            <br />
-            <span className="text-[var(--brand-accent)]">reviva suas memórias</span>
-          </h1>
-          
-          <p className="text-lg md:text-xl text-[var(--brand-muted)] max-w-2xl mx-auto mb-6">
-            Encontre, escolha e eternize cada lembrança.
-          </p>
+          <Carousel
+            opts={{ loop: true }}
+            className="relative mb-8"
+          >
+            <CarouselContent>
+              {heroHighlights.map((highlight) => (
+                <CarouselItem key={highlight.id}>
+                  <div className="group relative h-[360px] overflow-hidden rounded-2xl bg-black text-left shadow-2xl">
+                    <img
+                      src={highlight.image}
+                      alt={highlight.title}
+                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/30" />
+                    <div className="relative flex h-full flex-col justify-center gap-4 p-8 text-white">
+                      <span className="inline-flex w-fit items-center rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-widest text-white/90">
+                        Marketplace
+                      </span>
+                      <h1 className="text-3xl md:text-4xl font-semibold leading-tight">
+                        {highlight.title}
+                      </h1>
+                      <p className="max-w-xl text-sm md:text-base text-white/80">
+                        {highlight.description}
+                      </p>
+                      <div>
+                        <Button
+                          asChild
+                          className="bg-[var(--brand-primary)] hover:bg-[#CC3434] text-white"
+                        >
+                          <a href={highlight.ctaLink}>{highlight.ctaLabel}</a>
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="left-6 hidden h-10 w-10 bg-white/90 text-[var(--brand-primary)] shadow-lg backdrop-blur-sm transition-all hover:bg-white lg:flex" />
+            <CarouselNext className="right-6 hidden h-10 w-10 bg-white/90 text-[var(--brand-primary)] shadow-lg backdrop-blur-sm transition-all hover:bg-white lg:flex" />
+          </Carousel>
 
-          <div className="mb-8">
-            <Button 
+          <div className="mb-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Button
               onClick={() => setShowHireModal(true)}
               variant="outline"
               size="lg"
-              className="text-[var(--brand-primary)] hover:text-[#CC3434] border-[var(--brand-stroke)] hover:bg-[var(--brand-primary)]/5"
+              className="w-full sm:w-auto border-[var(--brand-stroke)] text-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/5 hover:text-[#CC3434]"
             >
               Quero contratar um fotógrafo
+            </Button>
+            <Button
+              onClick={handleFindEventClick}
+              size="lg"
+              className="w-full sm:w-auto bg-[var(--brand-primary)] text-white hover:bg-[#CC3434]"
+            >
+              <Search className="mr-2 h-4 w-4" />
+              Encontrar evento pelo nome
             </Button>
           </div>
 
