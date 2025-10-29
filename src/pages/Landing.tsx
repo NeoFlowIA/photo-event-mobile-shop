@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import TopBar from '@/components/TopBar';
 import HeroCarousel from '@/components/HeroCarousel';
-import StatsBadges from '@/components/StatsBadges';
+import EventStories from '@/components/EventStories';
 import SearchBar from '@/components/SearchBar';
 import EventsGrid from '@/components/EventsGrid';
 import HowItWorks from '@/components/HowItWorks';
@@ -28,7 +28,7 @@ const Landing = () => {
       <TopBar />
       <main>
         <HeroCarousel />
-        <StatsBadges />
+        <EventStories />
         <SearchBar onSearch={handleSearch} onSortChange={handleSortChange} />
         <EventsGrid 
           searchQuery={searchQuery}
