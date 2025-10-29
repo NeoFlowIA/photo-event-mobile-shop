@@ -38,9 +38,9 @@
     --radius: 0.75rem;
 
     /* Brand Color Tokens */
-    --brand-primary: #E03A3A;
+    --brand-primary: #FF3B30;
     --brand-secondary: #0A1F44;
-    --brand-accent: #FF6B6B;
+    --brand-accent: #FFD9D6;
     --brand-bg: #F7F9FC;
     --brand-surface: #FFFFFF;
     --brand-text: #111827;
@@ -90,5 +90,24 @@
   
   .nav-item {
     @apply flex items-center justify-center flex-col gap-2 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(var(--rotate-start)); }
+    50% { transform: translateY(-20px) rotate(var(--rotate-end)); }
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-float-delay-1 {
+    animation: float 7s ease-in-out infinite;
+    animation-delay: 0.5s;
+  }
+
+  .animate-float-delay-2 {
+    animation: float 8s ease-in-out infinite;
+    animation-delay: 1s;
   }
 }

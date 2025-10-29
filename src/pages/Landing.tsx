@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import TopBar from '@/components/TopBar';
-import Hero from '@/components/Hero';
+import HeroCarousel from '@/components/HeroCarousel';
 import StatsBadges from '@/components/StatsBadges';
 import SearchBar from '@/components/SearchBar';
 import EventsGrid from '@/components/EventsGrid';
@@ -27,7 +27,7 @@ const Landing = () => {
     <div className="min-h-screen bg-background">
       <TopBar />
       <main>
-        <Hero />
+        <HeroCarousel />
         <StatsBadges />
         <SearchBar onSearch={handleSearch} onSortChange={handleSortChange} />
         <EventsGrid 
