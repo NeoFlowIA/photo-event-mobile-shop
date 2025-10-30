@@ -6,6 +6,7 @@ import Users from './admin/Users';
 import Events from './admin/Events';
 import Photos from './admin/Photos';
 import Settings from './admin/Settings';
+import Sales from './admin/Sales';
 
 const AdminDashboard = () => (
   <Routes>
@@ -14,6 +15,7 @@ const AdminDashboard = () => (
       <Route path="usuarios" element={<Users />} />
       <Route path="eventos" element={<Events />} />
       <Route path="fotos" element={<Photos />} />
+      <Route path="vendas" element={<Sales />} />
       <Route path="configuracoes" element={<Settings />} />
       <Route path="*" element={<Navigate to="/admin" replace />} />
     </Route>
