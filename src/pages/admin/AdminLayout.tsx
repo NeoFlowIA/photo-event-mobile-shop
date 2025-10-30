@@ -8,6 +8,7 @@ import {
   Settings,
   Menu,
   X,
+  ShoppingBag,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -37,6 +38,11 @@ const navItems = [
     icon: Images,
   },
   {
+    to: '/admin/vendas',
+    label: 'Vendas',
+    icon: ShoppingBag,
+  },
+  {
     to: '/admin/configuracoes',
     label: 'Configurações',
     icon: Settings,
@@ -52,6 +58,7 @@ const AdminLayout = () => {
     <nav className="space-y-2">
       {navItems.map((item) => {
         const Icon = item.icon;
+        const isCurrent = item.end ? pathname === item.to : pathname.startsWith(item.to);
         return (
           <NavLink
             key={item.to}
@@ -60,14 +67,17 @@ const AdminLayout = () => {
             onClick={() => onNavigate?.()}
             className={({ isActive }) =>
               [
-                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--admin-primary))]/40',
                 isActive
-                  ? 'bg-[hsl(var(--admin-primary))] text-white'
+                  ? 'bg-[hsl(var(--admin-primary))]/10 text-slate-900'
                   : 'text-slate-700 hover:bg-slate-100',
               ].join(' ')
             }
           >
-            <Icon size={18} />
+            <Icon
+              size={18}
+              className={isCurrent ? 'text-[hsl(var(--admin-primary))]' : 'text-slate-400'}
+            />
             <span>{item.label}</span>
           </NavLink>
         );
@@ -157,6 +167,7 @@ const AdminLayout = () => {
               variant="ghost"
               size="icon"
               onClick={() => setOpenMobile(false)}
+              aria-label="Fechar menu"
             >
               <X size={18} />
             </Button>
