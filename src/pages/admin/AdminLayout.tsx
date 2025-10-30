@@ -5,6 +5,7 @@ import {
   Users,
   CalendarCheck,
   Images,
+  ShoppingCart,
   Settings,
   Menu,
   X,
@@ -35,6 +36,11 @@ const navItems = [
     to: '/admin/fotos',
     label: 'Fotos',
     icon: Images,
+  },
+  {
+    to: '/admin/vendas',
+    label: 'Vendas',
+    icon: ShoppingCart,
   },
   {
     to: '/admin/configuracoes',
