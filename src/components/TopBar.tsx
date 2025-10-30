@@ -18,13 +18,6 @@ const TopBar = () => {
     return () => window.removeEventListener('openAuthModal', handleOpenAuthModal);
   }, []);
 
-  const scrollToPhotographers = () => {
-    const element = document.querySelector('#encontrar-fotografo');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   const handleLogout = async () => {
     try {
       await logout();
@@ -50,14 +43,7 @@ const TopBar = () => {
               />
             </div>
             
-            <nav className="hidden md:flex items-center gap-6">
-              <button 
-                onClick={scrollToPhotographers}
-                className="text-sm font-medium text-foreground hover:text-primary transition-colors"
-              >
-                Contratar fotógrafo
-              </button>
-            </nav>
+            <div className="hidden md:flex items-center gap-6" />
           </div>
 
           <div className="flex items-center gap-4">

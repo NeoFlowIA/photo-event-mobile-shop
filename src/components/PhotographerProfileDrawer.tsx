@@ -1,9 +1,7 @@
-import { useState } from 'react';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Camera, Star, X } from 'lucide-react';
-import HirePhotographerModal from './HirePhotographerModal';
+import { MapPin, Star, X } from 'lucide-react';
 
 interface Photographer {
   id: string | number;
@@ -24,14 +22,7 @@ interface PhotographerProfileDrawerProps {
 }
 
 const PhotographerProfileDrawer = ({ open, onClose, photographer }: PhotographerProfileDrawerProps) => {
-  const [showHireModal, setShowHireModal] = useState(false);
-
   if (!photographer) return null;
-
-  const handleHireClick = () => {
-    setShowHireModal(true);
-    onClose();
-  };
 
   return (
     <>
@@ -114,26 +105,9 @@ const PhotographerProfileDrawer = ({ open, onClose, photographer }: Photographer
               </div>
             </div>
             
-            {/* CTA Button */}
-            <div className="pt-4">
-              <Button
-                onClick={handleHireClick}
-                className="w-full bg-[var(--brand-primary)] hover:bg-[#CC3434] text-white"
-                size="lg"
-              >
-                <Camera size={18} className="mr-2" />
-                Solicitar orçamento com {photographer.name.split(' ')[0]}
-              </Button>
-            </div>
           </div>
         </DrawerContent>
       </Drawer>
-      
-      <HirePhotographerModal
-        open={showHireModal}
-        onClose={() => setShowHireModal(false)}
-        preselectedPhotographer={photographer.name}
-      />
     </>
   );
 };
