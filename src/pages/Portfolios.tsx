@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import TopBar from '@/components/TopBar';
 import PhotographerProfileDrawer from '@/components/PhotographerProfileDrawer';
-import HirePhotographerModal from '@/components/HirePhotographerModal';
 import photographersData from '@/data/photographers.json';
+import { cn } from '@/lib/utils';
 
 type SpotlightPhotographer = {
   id: string;
@@ -28,6 +29,84 @@ type PortfolioPhotographer = SpotlightPhotographer & {
 };
 
 const ITEMS_PER_PAGE = 12;
+
+type SectionHeaderProps = {
+  title: string;
+  subtitle: string;
+  id?: string;
+};
+
+const SectionHeader = ({ title, subtitle, id }: SectionHeaderProps) => (
+  <div className="mx-auto max-w-3xl text-center">
+    <h1 id={id} className="text-3xl font-bold tracking-tight text-[#0A1F44] md:text-4xl">
+      {title}
+    </h1>
+    <p className="mt-4 text-lg text-[#4A5A7F]">{subtitle}</p>
+  </div>
+);
+
+type PhotographerCardProps = {
+  photographer: PortfolioPhotographer;
+  onViewProfile?: (photographer: PortfolioPhotographer) => void;
+};
+
+const PhotographerCard = ({ photographer, onViewProfile }: PhotographerCardProps) => (
+  <Card
+    className={cn(
+      'group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300',
+      'hover:-translate-y-1 hover:shadow-lg focus-within:ring-2 focus-within:ring-[#006CFF] focus-visible:outline-none'
+    )}
+  >
+    <div className="relative aspect-[4/3] overflow-hidden">
+      <img
+        src={photographer.image}
+        alt={`Portfólio de ${photographer.name}`}
+        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+        onError={(e) => {
+          const target = e.target as HTMLImageElement;
+          target.src = `https://via.placeholder.com/400x300/EEF2FF/0A1F44?text=${encodeURIComponent(photographer.name)}`;
+        }}
+      />
+    </div>
+
+    <CardContent className="flex flex-1 flex-col gap-4 p-5">
+      <div className="space-y-2">
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="text-lg font-semibold text-[#0A1F44]">{photographer.name}</h3>
+          <Badge className="rounded-full border-[#00C2FF]/30 bg-[#00C2FF]/10 px-3 py-1 text-xs font-medium text-[#006CFF]">
+            {photographer.city}
+          </Badge>
+        </div>
+        <p className="text-sm text-[#4A5A7F]">{photographer.specialty || photographer.category}</p>
+      </div>
+
+      {onViewProfile && (
+        <div className="mt-auto">
+          <Button
+            variant="link"
+            onClick={() => onViewProfile(photographer)}
+            className="p-0 text-base font-semibold text-[#006CFF] transition-colors hover:text-[#0047B3] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#006CFF]"
+          >
+            Ver perfil
+          </Button>
+        </div>
+      )}
+    </CardContent>
+  </Card>
+);
+
+type PhotographersGridProps = {
+  photographers: PortfolioPhotographer[];
+  onViewProfile?: (photographer: PortfolioPhotographer) => void;
+};
+
+const PhotographersGrid = ({ photographers, onViewProfile }: PhotographersGridProps) => (
+  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    {photographers.map((photographer) => (
+      <PhotographerCard key={photographer.id} photographer={photographer} onViewProfile={onViewProfile} />
+    ))}
+  </div>
+);
 
 // Generate additional mock photographers to have 24 total
 const generateMockPhotographers = (): PortfolioPhotographer[] => {
@@ -82,7 +161,6 @@ const Portfolios = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPhotographer, setSelectedPhotographer] = useState<PortfolioPhotographer | null>(null);
   const [showDrawer, setShowDrawer] = useState(false);
-  const [showHireModal, setShowHireModal] = useState(false);
 
   // Apply filters
   useEffect(() => {
@@ -134,177 +212,114 @@ const Portfolios = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--brand-bg)]">
+    <div className="min-h-screen bg-gradient-to-b from-[#F4F7FB] via-white to-white">
       <TopBar />
-      
-      <main className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-[var(--brand-secondary)] mb-4">
-            Portfólios de fotógrafos
-          </h1>
-          <p className="text-lg text-[var(--brand-muted)] mb-6">
-            Descubra fotógrafos especializados e contrate o profissional ideal para seu evento
-          </p>
-          
-          {/* CTA Button */}
-          <Button 
-            onClick={() => setShowHireModal(true)}
-            size="lg"
-            className="bg-[var(--brand-primary)] hover:bg-[#CC3434] text-white focus:ring-2 focus:ring-[var(--brand-primary)] mb-8"
-          >
-            Solicitar orçamento
-          </Button>
-        </div>
 
-        {/* Filters */}
-        <div className="bg-[var(--brand-surface)] rounded-xl border border-[var(--brand-stroke)] p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--brand-muted)]" size={16} />
-              <Input
-                placeholder="Buscar por nome ou @handle"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-[var(--brand-surface)] border-[var(--brand-stroke)] rounded-xl text-[var(--brand-text)] focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-[var(--brand-primary)]"
-              />
+      <main className="container mx-auto px-4 py-12">
+        <section aria-labelledby="photographers-section" className="space-y-10">
+          <SectionHeader
+            id="photographers-section"
+            title="Conheça Nossos Fotógrafos"
+            subtitle="Explore o portfólio de profissionais"
+          />
+
+          <div className="rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur-sm">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+              <div className="relative">
+                <Search
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#4A5A7F]"
+                  size={16}
+                  aria-hidden
+                />
+                <Input
+                  placeholder="Buscar por nome ou @handle"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="h-12 rounded-2xl border-slate-200 bg-white pl-10 text-[#0A1F44] focus-visible:ring-2 focus-visible:ring-[#006CFF]"
+                />
+              </div>
+
+              <Select value={cityFilter} onValueChange={(value) => setCityFilter(value === 'all' ? '' : value)}>
+                <SelectTrigger className="h-12 rounded-2xl border-slate-200 bg-white text-[#0A1F44] focus:ring-2 focus:ring-[#006CFF]">
+                  <SelectValue placeholder="Todas as cidades" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as cidades</SelectItem>
+                  {cities.map((city) => (
+                    <SelectItem key={city} value={city}>
+                      {city}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={categoryFilter} onValueChange={(value) => setCategoryFilter(value === 'all' ? '' : value)}>
+                <SelectTrigger className="h-12 rounded-2xl border-slate-200 bg-white text-[#0A1F44] focus:ring-2 focus:ring-[#006CFF]">
+                  <SelectValue placeholder="Todas as categorias" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as categorias</SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Button
+                variant="outline"
+                onClick={clearFilters}
+                className="h-12 rounded-2xl border-[#006CFF]/20 bg-white text-[#006CFF] transition-colors hover:bg-[#006CFF]/10 hover:text-[#0047B3] focus-visible:ring-2 focus-visible:ring-[#006CFF]"
+              >
+                Limpar filtros
+              </Button>
             </div>
-
-            {/* City Filter */}
-            <Select value={cityFilter} onValueChange={(value) => setCityFilter(value === 'all' ? '' : value)}>
-              <SelectTrigger className="bg-[var(--brand-surface)] border-[var(--brand-stroke)] rounded-xl text-[var(--brand-text)] focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-[var(--brand-primary)]">
-                <SelectValue placeholder="Todas as cidades" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas as cidades</SelectItem>
-                {cities.map(city => (
-                  <SelectItem key={city} value={city}>{city}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {/* Category Filter */}
-            <Select value={categoryFilter} onValueChange={(value) => setCategoryFilter(value === 'all' ? '' : value)}>
-              <SelectTrigger className="bg-[var(--brand-surface)] border-[var(--brand-stroke)] rounded-xl text-[var(--brand-text)] focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-[var(--brand-primary)]">
-                <SelectValue placeholder="Todas as categorias" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas as categorias</SelectItem>
-                {categories.map(category => (
-                  <SelectItem key={category} value={category}>{category}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {/* Clear Filters */}
-            <Button 
-              variant="outline" 
-              onClick={clearFilters}
-              className="text-[var(--brand-primary)] hover:text-[#CC3434] border-[var(--brand-stroke)] hover:bg-[var(--brand-primary)]/5 focus:ring-2 focus:ring-[var(--brand-primary)]"
-            >
-              Limpar filtros
-            </Button>
           </div>
-        </div>
 
-        {/* Results count */}
-        <div className="mb-6">
-          <p className="text-[var(--brand-muted)]">
+          <p className="text-sm text-[#4A5A7F]">
             {filteredPhotographers.length} fotógrafo{filteredPhotographers.length !== 1 ? 's' : ''} encontrado{filteredPhotographers.length !== 1 ? 's' : ''}
           </p>
-        </div>
 
-        {/* Photographers Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-          {currentPhotographers.map((photographer) => (
-            <Card key={photographer.id} className="group hover:shadow-lg transition-all duration-300 overflow-hidden bg-[var(--brand-surface)] border border-[var(--brand-stroke)]">
-              <div className="aspect-square relative overflow-hidden">
-                <img
-                  src={photographer.image}
-                  alt={`Fotógrafo ${photographer.name}`}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = `https://via.placeholder.com/300x300/E03A3A/FFFFFF?text=${encodeURIComponent(photographer.name)}`;
-                  }}
-                />
-                <div className="absolute top-3 left-3">
-                  <span className="text-xs bg-white/85 backdrop-blur text-[var(--brand-secondary)] border border-[var(--brand-stroke)] px-2 py-1 rounded-md font-medium">
-                    {photographer.handle}
-                  </span>
-                </div>
-                <div className="absolute top-3 right-3">
-                  <span className="text-xs bg-[var(--brand-accent)]/15 text-[var(--brand-accent)] border border-[var(--brand-accent)]/30 px-2 py-1 rounded-md font-medium">
-                    ⭐ {photographer.rating}
-                  </span>
-                </div>
-              </div>
-              
-              <CardContent className="p-4">
-                <h3 className="font-semibold text-lg mb-1 text-[var(--brand-secondary)]">
-                  {photographer.name}
-                </h3>
-                <p className="text-sm text-[var(--brand-muted)] mb-1">
-                  {photographer.city}
-                </p>
-                <p className="text-xs text-[var(--brand-muted)] mb-4">
-                  {photographer.category}
-                </p>
-                
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleViewProfile(photographer)}
-                  className="w-full text-[var(--brand-primary)] hover:text-[#CC3434] border-[var(--brand-stroke)] hover:bg-[var(--brand-primary)]/5 focus:ring-2 focus:ring-[var(--brand-primary)]"
-                >
-                  Ver perfil
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+          <PhotographersGrid
+            photographers={currentPhotographers}
+            onViewProfile={handleViewProfile}
+          />
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex justify-center items-center gap-4">
-            <Button
-              variant="outline"
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
-              className="text-[var(--brand-primary)] hover:text-[#CC3434] border-[var(--brand-stroke)] hover:bg-[var(--brand-primary)]/5 focus:ring-2 focus:ring-[var(--brand-primary)]"
-            >
-              <ChevronLeft size={16} className="mr-1" />
-              Anterior
-            </Button>
-            
-            <span className="text-[var(--brand-text)]">
-              Página {currentPage} de {totalPages}
-            </span>
-            
-            <Button
-              variant="outline"
-              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-              disabled={currentPage === totalPages}
-              className="text-[var(--brand-primary)] hover:text-[#CC3434] border-[var(--brand-stroke)] hover:bg-[var(--brand-primary)]/5 focus:ring-2 focus:ring-[var(--brand-primary)]"
-            >
-              Próxima
-              <ChevronRight size={16} className="ml-1" />
-            </Button>
-          </div>
-        )}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-4">
+              <Button
+                variant="outline"
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="rounded-full border-[#006CFF]/20 bg-white px-6 text-[#006CFF] transition-colors hover:bg-[#006CFF]/10 hover:text-[#0047B3] focus-visible:ring-2 focus-visible:ring-[#006CFF] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <ChevronLeft size={16} className="mr-1" />
+                Anterior
+              </Button>
+
+              <span className="text-sm font-medium text-[#0A1F44]">
+                Página {currentPage} de {totalPages}
+              </span>
+
+              <Button
+                variant="outline"
+                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                className="rounded-full border-[#006CFF]/20 bg-white px-6 text-[#006CFF] transition-colors hover:bg-[#006CFF]/10 hover:text-[#0047B3] focus-visible:ring-2 focus-visible:ring-[#006CFF] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Próxima
+                <ChevronRight size={16} className="ml-1" />
+              </Button>
+            </div>
+          )}
+        </section>
       </main>
 
-      {/* Modals */}
       <PhotographerProfileDrawer
         open={showDrawer}
         onClose={() => setShowDrawer(false)}
         photographer={selectedPhotographer}
-      />
-      
-      <HirePhotographerModal
-        open={showHireModal}
-        onClose={() => setShowHireModal(false)}
       />
     </div>
   );

@@ -4,14 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import CpfModal from './CpfModal';
-import HirePhotographerModal from './HirePhotographerModal';
 
 const Hero = () => {
   const { user } = useAuth();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [searchMessage, setSearchMessage] = useState('');
   const [showCpfModal, setShowCpfModal] = useState(false);
-  const [showHireModal, setShowHireModal] = useState(false);
   const [pendingAction, setPendingAction] = useState<'selfie' | null>(null);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,17 +104,6 @@ const Hero = () => {
             Encontre, escolha e eternize cada lembrança.
           </p>
 
-          <div className="mb-8">
-            <Button 
-              onClick={() => setShowHireModal(true)}
-              variant="outline"
-              size="lg"
-              className="text-[var(--brand-primary)] hover:text-[#CC3434] border-[var(--brand-stroke)] hover:bg-[var(--brand-primary)]/5"
-            >
-              Quero contratar um fotógrafo
-            </Button>
-          </div>
-
           {/* Selfie Match Search Bar */}
           <div className="max-w-3xl mx-auto mb-8">
             <div className="bg-[var(--brand-surface)] rounded-xl shadow-md px-4 py-3 flex flex-col sm:flex-row items-center gap-3 text-[var(--brand-text)]">
@@ -162,11 +149,6 @@ const Hero = () => {
         open={showCpfModal}
         onClose={() => setShowCpfModal(false)}
         onConfirm={handleCpfConfirm}
-      />
-      
-      <HirePhotographerModal
-        open={showHireModal}
-        onClose={() => setShowHireModal(false)}
       />
     </section>
   );
