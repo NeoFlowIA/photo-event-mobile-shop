@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { formatCurrency, formatDateTime } from './utils';
 
@@ -28,7 +29,7 @@ const planLabel: Record<AdminUserRecord['plan'], string> = {
 
 const Users = () => {
   const [search, setSearch] = useState('');
-  const [roleFilter, setRoleFilter] = useState<'all' | AdminUserRecord['role']>('all');
+  const [tab, setTab] = useState<'cliente' | 'fotografo' | 'admin'>('cliente');
   const [statusFilter, setStatusFilter] = useState<'all' | AdminUserStatus>('all');
   const [onlyFlagged, setOnlyFlagged] = useState(false);
   const [records, setRecords] = useState(adminUsers);
@@ -39,12 +40,12 @@ const Users = () => {
       const matchSearch = search
         ? `${user.name} ${user.email}`.toLowerCase().includes(search.toLowerCase())
         : true;
-      const matchRole = roleFilter === 'all' ? true : user.role === roleFilter;
+      const matchRole = user.role === tab;
       const matchStatus = statusFilter === 'all' ? true : user.status === statusFilter;
       const matchFlag = onlyFlagged ? user.flagged : true;
       return matchSearch && matchRole && matchStatus && matchFlag;
     });
-  }, [records, search, roleFilter, statusFilter, onlyFlagged]);
+  }, [records, search, tab, statusFilter, onlyFlagged]);
 
   const selectedUser = useMemo(
     () => records.find((user) => user.id === selectedId) ?? filtered[0] ?? null,
@@ -91,40 +92,23 @@ const Users = () => {
         <CardHeader>
           <CardTitle className="text-lg font-semibold text-slate-900">Gestão de usuários</CardTitle>
           <p className="text-sm text-slate-500">
-            Acompanhe clientes e fotógrafos habilitados no marketplace. Use os filtros para localizar contas e aplicar ações
-            administrativas.
+            Acompanhe clientes, fotógrafos e parceiros habilitados no marketplace. Use os filtros para localizar contas e aplicar ações administrativas.
           </p>
         </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-4">
-          <div className="md:col-span-2">
+        <CardContent className="grid gap-4 md:grid-cols-3">
+          <div>
             <label className="text-xs font-medium uppercase text-slate-500">Busca</label>
             <Input
-              placeholder="Nome, e-mail ou telefone"
+              placeholder="Nome ou e-mail"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               className="mt-1"
             />
           </div>
           <div>
-            <label className="text-xs font-medium uppercase text-slate-500">Perfil</label>
-            <div className="mt-1 flex gap-2">
-              {(['all', 'cliente', 'fotografo', 'admin'] as const).map((role) => (
-                <Button
-                  key={role}
-                  size="sm"
-                  variant={roleFilter === role ? 'default' : 'outline'}
-                  onClick={() => setRoleFilter(role)}
-                  className="flex-1"
-                >
-                  {role === 'all' ? 'Todos' : roleLabels[role]}
-                </Button>
-              ))}
-            </div>
-          </div>
-          <div>
             <label className="text-xs font-medium uppercase text-slate-500">Status</label>
             <div className="mt-1 flex gap-2">
-              {(['all', 'active', 'suspended', 'invited'] as const).map((status) => (
+              {(['all', 'active', 'suspended'] as const).map((status) => (
                 <Button
                   key={status}
                   size="sm"
@@ -140,14 +124,22 @@ const Users = () => {
           <div className="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2">
             <div>
               <p className="text-xs font-semibold uppercase text-slate-500">Somente sinalizados</p>
-              <p className="text-xs text-slate-500">Contas com pendências de compliance.</p>
+              <p className="text-xs text-slate-500">Contas com pendências.</p>
             </div>
             <Switch checked={onlyFlagged} onCheckedChange={setOnlyFlagged} />
           </div>
         </CardContent>
       </Card>
 
-      <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
+      <Tabs value={tab} onValueChange={(value) => setTab(value as 'cliente' | 'fotografo' | 'admin')}>
+        <TabsList className="bg-white">
+          <TabsTrigger value="cliente">Clientes</TabsTrigger>
+          <TabsTrigger value="fotografo">Fotógrafos</TabsTrigger>
+          <TabsTrigger value="admin">Parceiros</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value={tab} className="mt-6">
+          <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
         <Card className="border-transparent bg-white shadow-sm">
           <CardHeader>
             <CardTitle className="text-base font-semibold text-slate-800">{filtered.length} usuários encontrados</CardTitle>
@@ -257,7 +249,9 @@ const Users = () => {
             </CardContent>
           </Card>
         )}
-      </div>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
