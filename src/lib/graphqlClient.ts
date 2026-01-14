@@ -1,5 +1,4 @@
-const HASURA_GRAPHQL_URL = import.meta.env.VITE_HASURA_GRAPHQL_URL ??
-  "https://whatsapp-hasura.t2wird.easypanel.host/v1/graphql";
+const HASURA_GRAPHQL_URL = import.meta.env.VITE_HASURA_GRAPHQL_URL;
 
 const HASURA_ADMIN_SECRET = import.meta.env.VITE_HASURA_ADMIN_SECRET;
 
@@ -27,6 +26,9 @@ export async function graphqlRequest<T>(
   variables: Record<string, unknown> = {},
   options: GraphQLRequestOptions = {}
 ): Promise<T> {
+  if (!HASURA_GRAPHQL_URL) {
+    throw new GraphQLError("VITE_HASURA_GRAPHQL_URL não definido.");
+  }
   const { token, useAdminSecret, headers, signal } = options;
 
   const requestHeaders: HeadersInit = {
