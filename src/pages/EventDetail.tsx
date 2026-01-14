@@ -14,14 +14,17 @@ import { useAuth } from '@/contexts/AuthContext';
 import CpfModal from '@/components/CpfModal';
 import { toast } from '@/components/ui/use-toast';
 import { EventDetail as HasuraEventDetail, EventSummary, getEventById, getEventBySlug, searchEvents } from '@/services/eventService';
+import { getEventBySlug as getMockEventBySlug, getEventById as getMockEventById, getRelatedEvents as getMockRelatedEvents, EventDetail as MockEventDetail } from '@/data/eventsMock';
 
 const EventDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [event, setEvent] = useState<HasuraEventDetail | null>(null);
+  const [mockEvent, setMockEvent] = useState<MockEventDetail | null>(null);
   const [relatedEvents, setRelatedEvents] = useState<EventSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [usingMock, setUsingMock] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showCpfModal, setShowCpfModal] = useState(false);
   const { count } = useCart();
@@ -39,6 +42,7 @@ const EventDetailPage = () => {
     const fetchEvent = async () => {
       setLoading(true);
       setError(null);
+      setUsingMock(false);
 
       try {
         let fetched = await getEventBySlug(slug, undefined, controller.signal);
@@ -47,6 +51,28 @@ const EventDetailPage = () => {
         }
 
         if (!fetched) {
+          // Try to load from mock data as fallback
+          const mockData = getMockEventBySlug(slug) || getMockEventById(slug);
+          if (mockData && isMounted) {
+            setMockEvent(mockData);
+            setUsingMock(true);
+            setEvent(null);
+            document.title = `${mockData.title} — ${mockData.city}`;
+            
+            // Get mock related events
+            const mockRelated = getMockRelatedEvents(mockData.id, 4);
+            setRelatedEvents(mockRelated.map(m => ({
+              id: m.id,
+              title: m.title,
+              slug: m.slug,
+              city: m.city,
+              state: null,
+              start_at: m.date,
+              cover_url: m.cover
+            })));
+            return;
+          }
+          
           if (isMounted) {
             setError('Evento não encontrado.');
             setEvent(null);
@@ -56,6 +82,7 @@ const EventDetailPage = () => {
 
         if (isMounted) {
           setEvent(fetched);
+          setMockEvent(null);
           document.title = `${fetched.title ?? 'Evento'} — ${fetched.city ?? ''}`;
         }
 
@@ -65,9 +92,30 @@ const EventDetailPage = () => {
         }
       } catch (err) {
         if ((err as Error).name === 'AbortError') return;
-        console.error('Erro ao carregar evento', err);
+        console.error('Erro ao carregar evento via API, usando mock...', err);
+        
+        // Fallback to mock data on error
         if (isMounted) {
-          setError('Não foi possível carregar o evento no momento.');
+          const mockData = getMockEventBySlug(slug) || getMockEventById(slug);
+          if (mockData) {
+            setMockEvent(mockData);
+            setUsingMock(true);
+            setEvent(null);
+            document.title = `${mockData.title} — ${mockData.city}`;
+            
+            const mockRelated = getMockRelatedEvents(mockData.id, 4);
+            setRelatedEvents(mockRelated.map(m => ({
+              id: m.id,
+              title: m.title,
+              slug: m.slug,
+              city: m.city,
+              state: null,
+              start_at: m.date,
+              cover_url: m.cover
+            })));
+          } else {
+            setError('Não foi possível carregar o evento no momento.');
+          }
         }
       } finally {
         if (isMounted) {
@@ -107,16 +155,47 @@ const EventDetailPage = () => {
     });
   };
 
+  // Unified event data (from API or mock)
+  const displayEvent = useMemo(() => {
+    if (event) {
+      return {
+        id: event.id,
+        title: event.title ?? 'Evento',
+        city: event.city ?? '',
+        state: event.state ?? '',
+        venue_name: event.venue_name ?? '',
+        start_at: event.start_at ?? '',
+        description: event.description ?? '',
+        cover_url: event.cover_url ?? '',
+        owner_id: event.owner_id ?? null,
+      };
+    }
+    if (mockEvent) {
+      return {
+        id: mockEvent.id,
+        title: mockEvent.title,
+        city: mockEvent.city,
+        state: '',
+        venue_name: mockEvent.venue,
+        start_at: mockEvent.date,
+        description: mockEvent.description ?? '',
+        cover_url: mockEvent.cover,
+        owner_id: mockEvent.author.handle,
+      };
+    }
+    return null;
+  }, [event, mockEvent]);
+
   const locationLabel = useMemo(() => {
-    if (!event) return 'Local a definir';
-    const parts = [event.city, event.state].filter(Boolean);
+    if (!displayEvent) return 'Local a definir';
+    const parts = [displayEvent.city, displayEvent.state].filter(Boolean);
     return parts.length > 0 ? parts.join(' ') : 'Local a definir';
-  }, [event]);
+  }, [displayEvent]);
 
   const handleShare = async () => {
     const shareData = {
-      title: event?.title || '',
-      text: `Confira as fotos do evento ${event?.title}`,
+      title: displayEvent?.title || '',
+      text: `Confira as fotos do evento ${displayEvent?.title}`,
       url: window.location.href,
     };
 
@@ -168,18 +247,33 @@ const EventDetailPage = () => {
     );
   }
 
-  if (error || !event) {
+  if (error || (!event && !mockEvent)) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 text-center px-4">
         <p className="text-red-500">{error ?? 'Evento não encontrado.'}</p>
-        <Button onClick={() => navigate('/buscar-eventos')}>Voltar para busca</Button>
+        <Button onClick={() => navigate('/eventos')}>Ver todos os eventos</Button>
       </div>
     );
+  }
+
+  if (!displayEvent) {
+    return null;
   }
 
   return (
     <div className="min-h-screen flex flex-col pb-16">
       <Header />
+
+      {/* Mock data banner */}
+      {usingMock && (
+        <div className="bg-amber-50 border-b border-amber-200">
+          <div className="container mx-auto px-4 py-2">
+            <p className="text-sm text-amber-700 text-center">
+              📌 Exibindo dados de demonstração — conecte ao backend para dados reais.
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="bg-gradient-to-b from-gray-50 to-white border-b">
         <div className="container mx-auto px-4 py-6">
@@ -190,16 +284,16 @@ const EventDetailPage = () => {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink href="/buscar-eventos">Eventos</BreadcrumbLink>
+                <BreadcrumbLink href="/eventos">Eventos</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
-              <BreadcrumbPage>{event.title}</BreadcrumbPage>
+              <BreadcrumbPage>{displayEvent.title}</BreadcrumbPage>
             </BreadcrumbList>
           </Breadcrumb>
 
           <div className="flex flex-col lg:flex-row lg:items-start gap-6">
             <div className="flex-1">
-              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">{event.title}</h1>
+              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">{displayEvent.title}</h1>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="flex items-center gap-2 text-gray-600">
@@ -208,22 +302,22 @@ const EventDetailPage = () => {
                 </div>
                 <div className="flex items-center gap-2 text-gray-600">
                   <Calendar size={20} className="text-primary" />
-                  <span>{formatDateLong(event.start_at)}</span>
+                  <span>{formatDateLong(displayEvent.start_at)}</span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600">
                   <Building2 size={20} className="text-primary" />
-                  <span>{event.venue_name ?? 'Local a definir'}</span>
+                  <span>{displayEvent.venue_name || 'Local a definir'}</span>
                 </div>
               </div>
 
               <div className="flex items-center gap-3 mb-6">
                 <Avatar className="w-12 h-12">
-                  <AvatarImage src={event.cover_url ?? ''} alt={event.title ?? ''} />
-                  <AvatarFallback>{event.title?.charAt(0) ?? '?'}</AvatarFallback>
+                  <AvatarImage src={displayEvent.cover_url} alt={displayEvent.title} />
+                  <AvatarFallback>{displayEvent.title.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="font-medium text-gray-900">{event.owner_id ? 'Fotógrafo responsável' : 'Evento público'}</p>
-                  <p className="text-sm text-gray-600">ID do organizador: {event.owner_id ?? 'N/A'}</p>
+                  <p className="font-medium text-gray-900">{displayEvent.owner_id ? 'Fotógrafo responsável' : 'Evento público'}</p>
+                  <p className="text-sm text-gray-600">{displayEvent.owner_id ?? 'N/A'}</p>
                 </div>
               </div>
             </div>
@@ -257,7 +351,7 @@ const EventDetailPage = () => {
                 </Button>
               </div>
 
-              <PhotoGallery photos={[]} eventId={event.id} eventTitle={event.title ?? ''} />
+              <PhotoGallery photos={mockEvent?.photos ?? []} eventId={displayEvent.id} eventTitle={displayEvent.title} />
             </section>
 
             <section>
@@ -265,25 +359,25 @@ const EventDetailPage = () => {
               <Card>
                 <CardContent className="p-6 space-y-4">
                   <p className="text-gray-700 whitespace-pre-line">
-                    {event.description || 'O organizador ainda não adicionou uma descrição detalhada para este evento.'}
+                    {displayEvent.description || 'O organizador ainda não adicionou uma descrição detalhada para este evento.'}
                   </p>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
                     <div>
                       <span className="font-medium text-gray-900 block mb-1">Data</span>
-                      <span>{formatDate(event.start_at)}</span>
+                      <span>{formatDate(displayEvent.start_at)}</span>
                     </div>
                     <div>
                       <span className="font-medium text-gray-900 block mb-1">Local</span>
-                      <span>{event.venue_name ?? locationLabel}</span>
+                      <span>{displayEvent.venue_name || locationLabel}</span>
                     </div>
                     <div>
                       <span className="font-medium text-gray-900 block mb-1">Cidade</span>
-                      <span>{event.city ?? 'A definir'}</span>
+                      <span>{displayEvent.city || 'A definir'}</span>
                     </div>
                     <div>
                       <span className="font-medium text-gray-900 block mb-1">Estado</span>
-                      <span>{event.state ?? 'A definir'}</span>
+                      <span>{displayEvent.state || 'A definir'}</span>
                     </div>
                   </div>
                 </CardContent>

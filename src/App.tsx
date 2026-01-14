@@ -9,6 +9,7 @@ import Landing from "./pages/Landing";
 import Home from "./pages/Home";
 import SearchPhotos from "./pages/SearchPhotos";
 import SearchEvents from "./pages/SearchEvents";
+import AllEvents from "./pages/AllEvents";
 import Cart from "./pages/Cart";
 import History from "./pages/History";
 import Profile from "./pages/Profile";
@@ -98,6 +99,7 @@ const App = () => (
           <Route path="/home" element={<Home userName="João" isPhotographer={true} />} />
           <Route path="/buscar-fotos" element={<SearchPhotos />} />
           <Route path="/buscar-eventos" element={<SearchEvents />} />
+          <Route path="/eventos" element={<AllEvents />} />
           <Route path="/carrinho" element={<Cart userBalance={25} />} />
           <Route path="/historico" element={<History />} />
           <Route path="/perfil" element={<Profile />} />
