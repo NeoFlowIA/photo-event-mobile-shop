@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MapPin, Calendar, Building2 } from 'lucide-react';
@@ -23,6 +23,7 @@ interface EventsGridProps {
 }
 
 const EventsGrid = ({ searchQuery = '', cityFilter = '', sortBy = 'date-desc' }: EventsGridProps) => {
+  const navigate = useNavigate();
   const [filteredEvents, setFilteredEvents] = useState<Event[]>(eventsData);
 
   useEffect(() => {
@@ -144,6 +145,7 @@ const EventsGrid = ({ searchQuery = '', cityFilter = '', sortBy = 'date-desc' }:
           <Button 
             variant="outline" 
             size="lg"
+            onClick={() => navigate('/eventos')}
             className="text-[var(--brand-primary)] hover:text-[#CC3434] border-[var(--brand-stroke)] hover:bg-[var(--brand-primary)]/5 focus:ring-2 focus:ring-[var(--brand-primary)]"
           >
             Ver todos os eventos
