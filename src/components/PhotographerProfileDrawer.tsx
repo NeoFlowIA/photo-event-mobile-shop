@@ -1,7 +1,10 @@
+import { useState } from 'react';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Star, X } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { MapPin, Star, X, Camera, Calendar, Instagram, Award, ChevronLeft, ChevronRight } from 'lucide-react';
+import HirePhotographerModal from './HirePhotographerModal';
 
 interface Photographer {
   id: string | number;
@@ -22,92 +25,255 @@ interface PhotographerProfileDrawerProps {
 }
 
 const PhotographerProfileDrawer = ({ open, onClose, photographer }: PhotographerProfileDrawerProps) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showHireModal, setShowHireModal] = useState(false);
+
   if (!photographer) return null;
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => 
+      prev === photographer.portfolio.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => 
+      prev === 0 ? photographer.portfolio.length - 1 : prev - 1
+    );
+  };
+
+  // Mock stats for demo
+  const stats = {
+    events: 48,
+    photos: 3240,
+    years: 5
+  };
 
   return (
     <>
       <Drawer open={open} onOpenChange={onClose}>
-        <DrawerContent className="max-h-[85vh]">
-          <DrawerHeader className="text-left">
-            <div className="flex items-center justify-between">
-              <DrawerTitle>Perfil do Fotógrafo</DrawerTitle>
-              <DrawerClose asChild>
-                <Button variant="ghost" size="sm">
-                  <X size={16} />
-                </Button>
-              </DrawerClose>
-            </div>
-          </DrawerHeader>
-          
-          <div className="px-4 pb-6 space-y-6 overflow-y-auto">
-            {/* Profile Header */}
-            <div className="flex items-start gap-4">
-              <div className="w-20 h-20 rounded-full overflow-hidden flex-shrink-0">
-                <img
-                  src={photographer.image}
-                  alt={photographer.name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = `https://via.placeholder.com/120x120/E03A3A/FFFFFF?text=${encodeURIComponent(photographer.name.split(' ')[0])}`;
-                  }}
-                />
+        <DrawerContent className="max-h-[92vh] bg-background">
+          {/* Header com gradiente sutil */}
+          <div className="relative bg-gradient-to-b from-primary/5 to-background pb-4">
+            <DrawerHeader className="pb-0">
+              <div className="flex items-center justify-between">
+                <DrawerTitle className="text-lg font-semibold text-foreground">
+                  Perfil do Fotógrafo
+                </DrawerTitle>
+                <DrawerClose asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8 rounded-full hover:bg-muted"
+                    aria-label="Fechar"
+                  >
+                    <X size={18} />
+                  </Button>
+                </DrawerClose>
               </div>
-              
-              <div className="flex-1">
-                <h3 className="text-xl font-bold text-[var(--brand-secondary)]">
-                  {photographer.name}
-                </h3>
-                <p className="text-[var(--brand-muted)] mb-2">{photographer.handle}</p>
-                
-                <div className="flex items-center gap-4 text-sm text-[var(--brand-muted)]">
-                  <div className="flex items-center gap-1">
-                    <MapPin size={14} />
-                    <span>{photographer.city}</span>
+            </DrawerHeader>
+          </div>
+          
+          <div className="px-4 pb-8 space-y-6 overflow-y-auto">
+            {/* Profile Header Card */}
+            <Card className="border-0 shadow-sm bg-card overflow-hidden">
+              <CardContent className="p-0">
+                <div className="flex flex-col sm:flex-row gap-4 p-4">
+                  {/* Avatar com borda e efeito */}
+                  <div className="flex-shrink-0 mx-auto sm:mx-0">
+                    <div className="relative">
+                      <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden ring-4 ring-primary/10 shadow-lg">
+                        <img
+                          src={photographer.image}
+                          alt={photographer.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = `https://via.placeholder.com/120x120/E03A3A/FFFFFF?text=${encodeURIComponent(photographer.name.split(' ')[0])}`;
+                          }}
+                        />
+                      </div>
+                      {/* Badge de verificado */}
+                      <div className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground rounded-full p-1.5 shadow-md">
+                        <Award size={14} />
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Star size={14} className="text-yellow-500" />
-                    <span>{photographer.rating}</span>
+                  
+                  {/* Info */}
+                  <div className="flex-1 text-center sm:text-left">
+                    <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-1">
+                      {photographer.name}
+                    </h3>
+                    <div className="flex items-center justify-center sm:justify-start gap-1.5 text-muted-foreground mb-3">
+                      <Instagram size={14} className="text-primary" />
+                      <span className="text-sm font-medium">{photographer.handle}</span>
+                    </div>
+                    
+                    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-sm">
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <MapPin size={14} className="text-primary/70" />
+                        <span>{photographer.city}</span>
+                      </div>
+                      <div className="flex items-center gap-1 bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full">
+                        <Star size={14} className="fill-amber-400 text-amber-400" />
+                        <span className="font-semibold">{photographer.rating}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-3">
+                      <Badge 
+                        variant="secondary" 
+                        className="bg-primary/10 text-primary border-0 font-medium"
+                      >
+                        <Camera size={12} className="mr-1" />
+                        {photographer.specialty}
+                      </Badge>
+                    </div>
                   </div>
                 </div>
-                
-                <Badge variant="secondary" className="mt-2">
-                  {photographer.specialty}
-                </Badge>
-              </div>
+              </CardContent>
+            </Card>
+
+            {/* Stats Cards */}
+            <div className="grid grid-cols-3 gap-3">
+              <Card className="border-0 shadow-sm bg-gradient-to-br from-card to-muted/30">
+                <CardContent className="p-3 text-center">
+                  <p className="text-2xl font-bold text-primary">{stats.events}</p>
+                  <p className="text-xs text-muted-foreground font-medium">Eventos</p>
+                </CardContent>
+              </Card>
+              <Card className="border-0 shadow-sm bg-gradient-to-br from-card to-muted/30">
+                <CardContent className="p-3 text-center">
+                  <p className="text-2xl font-bold text-primary">{stats.photos.toLocaleString('pt-BR')}</p>
+                  <p className="text-xs text-muted-foreground font-medium">Fotos</p>
+                </CardContent>
+              </Card>
+              <Card className="border-0 shadow-sm bg-gradient-to-br from-card to-muted/30">
+                <CardContent className="p-3 text-center">
+                  <p className="text-2xl font-bold text-primary">{stats.years}</p>
+                  <p className="text-xs text-muted-foreground font-medium">Anos exp.</p>
+                </CardContent>
+              </Card>
             </div>
             
-            {/* Description */}
-            <div>
-              <h4 className="font-semibold text-[var(--brand-secondary)] mb-2">Sobre</h4>
-              <p className="text-[var(--brand-muted)] text-sm leading-relaxed">
+            {/* Sobre */}
+            <div className="space-y-2">
+              <h4 className="font-semibold text-foreground flex items-center gap-2">
+                <span className="w-1 h-4 bg-primary rounded-full" />
+                Sobre
+              </h4>
+              <p className="text-muted-foreground text-sm leading-relaxed pl-3">
                 {photographer.description}
               </p>
             </div>
             
-            {/* Portfolio */}
-            <div>
-              <h4 className="font-semibold text-[var(--brand-secondary)] mb-3">Portfólio</h4>
-              <div className="grid grid-cols-3 gap-2">
+            {/* Portfolio Carousel */}
+            <div className="space-y-3">
+              <h4 className="font-semibold text-foreground flex items-center gap-2">
+                <span className="w-1 h-4 bg-primary rounded-full" />
+                Portfólio
+              </h4>
+              
+              {/* Carousel principal */}
+              <div className="relative group">
+                <div className="aspect-[4/3] rounded-xl overflow-hidden shadow-md bg-muted">
+                  <img
+                    src={photographer.portfolio[currentImageIndex]}
+                    alt={`Trabalho ${currentImageIndex + 1} de ${photographer.name}`}
+                    className="w-full h-full object-cover transition-transform duration-300"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = `https://images.unsplash.com/photo-1516975080664?w=600&h=450&fit=crop`;
+                    }}
+                  />
+                </div>
+                
+                {/* Navigation arrows */}
+                {photographer.portfolio.length > 1 && (
+                  <>
+                    <button
+                      onClick={prevImage}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/90 hover:bg-background text-foreground rounded-full p-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                      aria-label="Imagem anterior"
+                    >
+                      <ChevronLeft size={20} />
+                    </button>
+                    <button
+                      onClick={nextImage}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/90 hover:bg-background text-foreground rounded-full p-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                      aria-label="Próxima imagem"
+                    >
+                      <ChevronRight size={20} />
+                    </button>
+                  </>
+                )}
+                
+                {/* Dots indicator */}
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                  {photographer.portfolio.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentImageIndex(index)}
+                      className={`w-2 h-2 rounded-full transition-all ${
+                        index === currentImageIndex 
+                          ? 'bg-primary w-6' 
+                          : 'bg-background/70 hover:bg-background'
+                      }`}
+                      aria-label={`Ver imagem ${index + 1}`}
+                    />
+                  ))}
+                </div>
+              </div>
+              
+              {/* Thumbnails */}
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                 {photographer.portfolio.map((image, index) => (
-                  <div key={index} className="aspect-square rounded-lg overflow-hidden">
+                  <button
+                    key={index}
+                    onClick={() => setCurrentImageIndex(index)}
+                    className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden transition-all ${
+                      index === currentImageIndex 
+                        ? 'ring-2 ring-primary ring-offset-2' 
+                        : 'opacity-60 hover:opacity-100'
+                    }`}
+                  >
                     <img
                       src={image}
-                      alt={`Trabalho ${index + 1} de ${photographer.name}`}
+                      alt={`Miniatura ${index + 1}`}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        target.src = `https://images.unsplash.com/photo-${1516975080664 + index}?w=200&h=200&fit=crop`;
+                        target.src = `https://images.unsplash.com/photo-${1516975080664 + index}?w=100&h=100&fit=crop`;
                       }}
                     />
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
             
+            {/* CTA Button */}
+            <div className="sticky bottom-0 pt-4 pb-2 bg-gradient-to-t from-background via-background to-transparent -mx-4 px-4">
+              <Button 
+                onClick={() => setShowHireModal(true)}
+                className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-base shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30"
+              >
+                <Calendar size={18} className="mr-2" />
+                Solicitar orçamento com {photographer.name.split(' ')[0]}
+              </Button>
+              <p className="text-xs text-center text-muted-foreground mt-2">
+                Resposta em até 24 horas
+              </p>
+            </div>
           </div>
         </DrawerContent>
       </Drawer>
+
+      <HirePhotographerModal
+        open={showHireModal}
+        onClose={() => setShowHireModal(false)}
+        preselectedPhotographer={photographer.name}
+      />
     </>
   );
 };
