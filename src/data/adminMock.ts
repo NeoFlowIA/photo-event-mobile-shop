@@ -630,7 +630,7 @@ export interface AdminIntegrationConfig {
 }
 
 export const adminIntegrationConfig: AdminIntegrationConfig = {
-  hasuraEndpoint: 'https://infra-olha-a-foto-backend.k3p3ex.easypanel.host/v1/graphql',
+  hasuraEndpoint: import.meta.env.VITE_HASURA_GRAPHQL_URL ?? '',
   adminSecretMasked: 'hasura-admin-***',
   analyticsProvider: 'Posthog Cloud (região: US)',
   storageProvider: 'Google Cloud Storage',
