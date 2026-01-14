@@ -3,8 +3,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from '@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { MapPin, Star, X, Camera, Calendar, Instagram, Award, ChevronLeft, ChevronRight } from 'lucide-react';
-import HirePhotographerModal from './HirePhotographerModal';
+import { MapPin, Star, X, Camera, Instagram, Award, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Photographer {
   id: string | number;
@@ -26,7 +25,6 @@ interface PhotographerProfileDrawerProps {
 
 const PhotographerProfileDrawer = ({ open, onClose, photographer }: PhotographerProfileDrawerProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [showHireModal, setShowHireModal] = useState(false);
 
   if (!photographer) return null;
 
@@ -252,28 +250,9 @@ const PhotographerProfileDrawer = ({ open, onClose, photographer }: Photographer
               </div>
             </div>
             
-            {/* CTA Button */}
-            <div className="sticky bottom-0 pt-4 pb-2 bg-gradient-to-t from-background via-background to-transparent -mx-4 px-4">
-              <Button 
-                onClick={() => setShowHireModal(true)}
-                className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-base shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30"
-              >
-                <Calendar size={18} className="mr-2" />
-                Solicitar orçamento com {photographer.name.split(' ')[0]}
-              </Button>
-              <p className="text-xs text-center text-muted-foreground mt-2">
-                Resposta em até 24 horas
-              </p>
-            </div>
           </div>
         </DrawerContent>
       </Drawer>
-
-      <HirePhotographerModal
-        open={showHireModal}
-        onClose={() => setShowHireModal(false)}
-        preselectedPhotographer={photographer.name}
-      />
     </>
   );
 };
